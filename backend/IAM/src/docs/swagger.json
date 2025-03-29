@@ -1,0 +1,191 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Autenticación",
+    "version": "1.0.0",
+    "description": "Esta API permite registrar e iniciar sesión de usuarios mediante Keycloak."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Registrar un nuevo usuario",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "username": "usuario1",
+                "email": "correo@ejemplo.com",
+                "password": "ClaveSegura1!",
+                "firstName": "Juan",
+                "lastName": "Pérez"
+              },
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string", "example": "usuario1" },
+                  "email": { "type": "string", "format": "email" },
+                  "password": {
+                    "type": "string",
+                    "description": "Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo."
+                  },
+                  "firstName": { "type": "string" },
+                  "lastName": { "type": "string" }
+                },
+                "required": [
+                  "username",
+                  "email",
+                  "password",
+                  "firstName",
+                  "lastName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario registrado correctamente"
+          },
+          "400": {
+            "description": "Datos inválidos (formato incorrecto o contraseña débil)",
+            "content": {
+              "application/json": {
+                "example": {
+                  "errores": [
+                    "\"email\" debe ser un correo válido",
+                    "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo especial."
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El usuario ya existe",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "El usuario ya existe"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Iniciar sesión y obtener token JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "username": "usuario1",
+                "password": "ClaveSegura1!"
+              },
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso. Devuelve tokens JWT",
+            "content": {
+              "application/json": {
+                "example": {
+                  "access_token": "eyJhbGciOiJIUzI1...",
+                  "refresh_token": "eyJhbGciOiJIUzI1...",
+                  "expires_in": 300,
+                  "refresh_expires_in": 1800,
+                  "token_type": "Bearer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Faltan campos requeridos",
+            "content": {
+              "application/json": {
+                "example": {
+                  "errores": ["\"username\" es obligatorio"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales inválidas",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Credenciales inválidas"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/rol/admin": {
+      "get": {
+        "summary": "Ruta protegida (solo admins)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Acceso autorizado para rol admin"
+          },
+          "403": {
+            "description": "Acceso denegado: el usuario no tiene el rol requerido"
+          },
+          "401": {
+            "description": "No autorizado (sin token válido)"
+          }
+        }
+      }
+    },
+    "/rol/jugador": {
+      "get": {
+        "summary": "Ruta protegida (solo jugadores)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Acceso autorizado para rol jugador"
+          },
+          "403": {
+            "description": "Acceso denegado: el usuario no tiene el rol requerido"
+          },
+          "401": {
+            "description": "No autorizado (sin token válido)"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

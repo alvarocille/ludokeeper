@@ -1,0 +1,10 @@
+# Contenedores, volúmenes y datos persistentes
+*.log
+*.tmp
+*.lock
+*.bak
+
+# Docker data
+data/
+themes/
+import/

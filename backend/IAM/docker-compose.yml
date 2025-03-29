@@ -1,0 +1,10 @@
+services:
+  iam:
+    build:
+      context: .
+    image: ${IAM_IMAGE}
+    container_name: ${IAM_CONTAINER}
+    ports:
+      - "${IAM_PORT}:3000"
+    env_file:
+      - .env

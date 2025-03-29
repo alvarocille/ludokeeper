@@ -1,0 +1,28 @@
+# Node y entorno
+node_modules/
+.env
+.env.*
+
+# Logs
+logs
+*.log
+
+# Docker
+*.pid
+*.seed
+docker-data/
+docker-compose.override.yml
+
+# VSCode y sistema
+.vscode/
+.DS_Store
+*.swp
+
+# Coverage / test
+coverage/
+jest-coverage/
+nyc_output/
+
+# Dependencias bloqueadas o lock files innecesarios globales
+yarn.lock
+pnpm-lock.yaml
