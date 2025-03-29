@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "types": ["@types/react", "@types/react-native"],
+      "baseUrl": ".",
+      "paths": {
+        "@env": ["./env.d.ts"],
+        "src/*": ["src/*"],
+      }
+    },
+  "extends": "expo/tsconfig.base"
+}
