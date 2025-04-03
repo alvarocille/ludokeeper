@@ -1,14 +1,13 @@
 import { Slot, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { useAuthStore } from "../src/store/authStore";
+import { useAuthStore } from "src/store/authStore";
 
 export default function RootLayout() {
   const { token, isLoading, loadToken } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
 
-  // Cargar token al iniciar
   useEffect(() => {
     loadToken();
   }, [loadToken]);
@@ -18,16 +17,20 @@ export default function RootLayout() {
 
     const currentPath = segments.join("/");
 
-    const isAuthPage =
-      currentPath === "auth/login" || currentPath === "auth/register";
-    const isPublicPage = isAuthPage || currentPath === "settings";
+    const publicPaths = [
+      "(auth)/login",
+      "(auth)/register",
+      "(root)/main/settings",
+    ];
+
+    const isPublicPage = publicPaths.includes(currentPath);
 
     if (!token && !isPublicPage) {
-      router.replace("/auth/login");
+      router.replace("/(auth)/login");
     }
 
-    if (token && isAuthPage) {
-      router.replace("/home");
+    if (token && currentPath.startsWith("(auth)")) {
+      router.replace("(root)/inventory");
     }
   }, [segments, token, isLoading, router]);
 

@@ -34,7 +34,7 @@ export default function LoginScreen() {
     <View style={[authStyles.container, { backgroundColor: theme.background }]}>
       <Pressable
         style={authStyles.settingsButton}
-        onPress={() => router.push("/settings")}
+        onPress={() => router.push("/(drawer)/settings")}
       >
         <Ionicons name="settings-outline" size={24} color={theme.text} />
       </Pressable>
@@ -73,7 +73,7 @@ export default function LoginScreen() {
         />
       </FormContainer>
 
-      <Pressable onPress={() => router.push("/auth/register")}>
+      <Pressable onPress={() => router.push("/(auth)/register")}>
         <Text style={[authStyles.linkText, { color: theme.secondary }]}>
           ¿No tienes cuenta? Regístrate
         </Text>
