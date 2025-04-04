@@ -1,4 +1,5 @@
-import { Text, useColorScheme, View } from "react-native";
+import { useColorScheme, View } from "react-native";
+import { LogoDynamic } from "src/components/logo/LogoDynamic";
 import { colors } from "src/styles/colors";
 import { screenStyles } from "src/styles/screen";
 
@@ -13,9 +14,7 @@ export default function InventoryScreen() {
         { backgroundColor: themeColors.background },
       ]}
     >
-      <Text style={[screenStyles.title, { color: themeColors.text }]}>
-        Inventario
-      </Text>
+      <LogoDynamic />
     </View>
   );
 }
