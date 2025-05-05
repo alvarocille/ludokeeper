@@ -1,7 +1,9 @@
-import { colors } from "src/styles/colors";
-import { fonts } from "src/styles/fonts";
+import { Slot } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { useColorScheme } from "react-native";
+import { navigationItems } from "src/constants/navItems";
+import { colors } from "src/styles/colors";
+import { fonts } from "src/styles/fonts";
 
 export default function DrawerLayout() {
   const theme = useColorScheme();
@@ -29,26 +31,17 @@ export default function DrawerLayout() {
         headerTintColor: themeColors.secondary,
       }}
     >
-      <Drawer.Screen
-        name="inventory"
-        options={{ drawerLabel: "Inventario", title: "Inventario" }}
-      />
-      <Drawer.Screen
-        name="matches"
-        options={{ drawerLabel: "Partidas", title: "Partidas" }}
-      />
-      <Drawer.Screen
-        name="tools"
-        options={{ drawerLabel: "Herramientas", title: "Herramientas" }}
-      />
-      <Drawer.Screen
-        name="explore"
-        options={{ drawerLabel: "Explorar", title: "Explorar" }}
-      />
-      <Drawer.Screen
-        name="other"
-        options={{ drawerLabel: "Otro", title: "Otro" }}
-      />
+      {navigationItems.map((item) => (
+        <Drawer.Screen
+          key={item.name}
+          name={item.name}
+          options={{
+            drawerLabel: item.title,
+            title: item.title,
+          }}
+        />
+      ))}
+      <Slot />
     </Drawer>
   );
 }

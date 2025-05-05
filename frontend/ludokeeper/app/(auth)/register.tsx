@@ -32,7 +32,7 @@ export default function RegisterScreen() {
     <View style={[authStyles.container, { backgroundColor: theme.background }]}>
       <Pressable
         style={authStyles.settingsButton}
-        onPress={() => router.push("/(drawer)/settings")}
+        onPress={() => router.push("/(other)/settings")}
       >
         <Ionicons name="settings-outline" size={24} color={theme.text} />
       </Pressable>

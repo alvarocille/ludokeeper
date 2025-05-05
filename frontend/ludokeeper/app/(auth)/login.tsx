@@ -27,14 +27,14 @@ export default function LoginScreen() {
   } = useAuthForm(loginSchema, async (data) => {
     const res = await login(data.username, data.password);
     await setToken(res.access_token);
-    router.replace("/");
+    router.replace("/(root)/inventory");
   });
 
   return (
     <View style={[authStyles.container, { backgroundColor: theme.background }]}>
       <Pressable
         style={authStyles.settingsButton}
-        onPress={() => router.push("/(drawer)/settings")}
+        onPress={() => router.push("/(other)/settings")}
       >
         <Ionicons name="settings-outline" size={24} color={theme.text} />
       </Pressable>

@@ -1,10 +1,11 @@
 import { Stack } from "expo-router";
 import { Text, useColorScheme, View } from "react-native";
+import { BackButton } from "src/components/button/BackButton";
 import { colors } from "src/styles/colors";
 import { fonts } from "src/styles/fonts";
 import { screenStyles } from "src/styles/screen";
 
-export default function AboutScreen() {
+export default function SettingsScreen() {
   const theme = useColorScheme();
   const themeColors = colors[theme ?? "light"];
 
@@ -12,15 +13,20 @@ export default function AboutScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "Acerca de",
-          headerStyle: { backgroundColor: themeColors.background },
-          headerTitleStyle: {
-            fontFamily: fonts.heading,
-            color: themeColors.text,
+          title: "Configuración",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: themeColors.background,
           },
+          headerTitleStyle: {
+            color: themeColors.text,
+            fontFamily: fonts.heading,
+            fontSize: 20,
+          },
+          headerTintColor: themeColors.secondary,
+          headerLeft: () => <BackButton />,
         }}
       />
-
       <View
         style={[
           screenStyles.container,
@@ -28,7 +34,7 @@ export default function AboutScreen() {
         ]}
       >
         <Text style={[screenStyles.title, { color: themeColors.text }]}>
-          Acerca de
+          Configuración
         </Text>
       </View>
     </>

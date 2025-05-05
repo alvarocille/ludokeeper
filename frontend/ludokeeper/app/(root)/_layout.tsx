@@ -1,10 +1,23 @@
-import { useWindowDimensions } from "react-native";
-import DrawerLayout from "src/components/layouts/drawer-layout";
-import TabsLayout from "src/components/layouts/tabs-layout";
+import { Redirect } from "expo-router";
+import { ActivityIndicator, Platform, View } from "react-native";
+import DrawerLayout from "src/components/layouts/drawerLayout";
+import TabsLayout from "src/components/layouts/tabsLayout";
+import { useAuthStore } from "src/store/authStore";
 
-export default function ResponsiveLayout() {
-  const { width } = useWindowDimensions();
-  const isLargeScreen = width >= 768;
+export default function AppLayout() {
+  const { isAuthenticated, isLoading } = useAuthStore();
 
-  return isLargeScreen ? <DrawerLayout /> : <TabsLayout />;
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  return Platform.OS === "web" ? <DrawerLayout /> : <TabsLayout />;
 }

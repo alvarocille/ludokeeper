@@ -1,38 +1,14 @@
-import { Slot, useRouter, useSegments } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { useAuthStore } from "src/store/authStore";
 
 export default function RootLayout() {
-  const { token, isLoading, loadToken } = useAuthStore();
-  const segments = useSegments();
-  const router = useRouter();
+  const { loadToken, isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
     loadToken();
   }, [loadToken]);
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    const currentPath = segments.join("/");
-
-    const publicPaths = [
-      "(auth)/login",
-      "(auth)/register",
-      "(root)/main/settings",
-    ];
-
-    const isPublicPage = publicPaths.includes(currentPath);
-
-    if (!token && !isPublicPage) {
-      router.replace("/(auth)/login");
-    }
-
-    if (token && currentPath.startsWith("(auth)")) {
-      router.replace("(root)/inventory");
-    }
-  }, [segments, token, isLoading, router]);
 
   if (isLoading) {
     return (
@@ -42,5 +18,10 @@ export default function RootLayout() {
     );
   }
 
-  return <Slot />;
+  return (
+    <>
+      {!isAuthenticated && <Redirect href="/(auth)/login" />}
+      <Stack screenOptions={{ headerShown: false }} />
+    </>
+  );
 }

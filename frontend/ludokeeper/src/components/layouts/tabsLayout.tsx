@@ -1,9 +1,9 @@
-import { tabIconMap } from "src/constants/icons";
+import { Ionicons } from "@expo/vector-icons";
+import { Slot, Tabs } from "expo-router";
+import { useColorScheme } from "react-native";
+import { navigationItems } from "src/constants/navItems";
 import { colors } from "src/styles/colors";
 import { fonts } from "src/styles/fonts";
-import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
-import { useColorScheme } from "react-native";
 
 export default function TabsLayout() {
   const theme = useColorScheme();
@@ -29,16 +29,21 @@ export default function TabsLayout() {
           borderTopColor: themeColors.border,
         },
         tabBarIcon: ({ color, size }) => {
-          const iconName = tabIconMap[route.name as keyof typeof tabIconMap];
+          const iconName =
+            navigationItems.find((item) => item.name === route.name)?.icon ||
+            "ellipse";
           return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
     >
-      <Tabs.Screen name="inventory" options={{ title: "Inventario" }} />
-      <Tabs.Screen name="matches" options={{ title: "Partidas" }} />
-      <Tabs.Screen name="tools" options={{ title: "Herramientas" }} />
-      <Tabs.Screen name="explore" options={{ title: "Explorar" }} />
-      <Tabs.Screen name="other" options={{ title: "Otro" }} />
+      {navigationItems.map((item) => (
+        <Tabs.Screen
+          key={item.name}
+          name={item.name}
+          options={{ title: item.title }}
+        />
+      ))}
+      <Slot />
     </Tabs>
   );
 }
