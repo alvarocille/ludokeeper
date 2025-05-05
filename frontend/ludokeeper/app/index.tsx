@@ -1,10 +1,17 @@
-import { Redirect } from "expo-router";
-import { useAuthStore } from "../src/store/authStore";
+import { useRootNavigationState, useRouter } from "expo-router";
+import { useEffect } from "react";
+import { useAuthStore } from "src/store/authStore";
 
 export default function Index() {
-  const { token, isLoading } = useAuthStore();
+  const router = useRouter();
+  const navigationState = useRootNavigationState();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
-  if (isLoading) return null;
+  useEffect(() => {
+    if (!navigationState?.key || isLoading) return;
 
-  return <Redirect href={token ? "/(root)/inventory" : "/(auth)/login"} />;
+    router.replace(isAuthenticated ? "/(root)/inventory" : "/(auth)/login");
+  }, [isAuthenticated, isLoading, navigationState, router]);
+
+  return null;
 }

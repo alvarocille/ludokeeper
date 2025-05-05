@@ -94,7 +94,7 @@ export default function RegisterScreen() {
         />
       </FormContainer>
 
-      <Pressable onPress={() => router.replace("/")}>
+      <Pressable onPress={() => router.replace("/(auth)/login")}>
         {" "}
         <Text style={[authStyles.linkText, { color: theme.secondary }]}>
           ¿Ya tienes cuenta? Inicia sesión
