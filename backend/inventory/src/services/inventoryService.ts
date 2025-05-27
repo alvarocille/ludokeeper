@@ -7,6 +7,12 @@ interface GameBase {
   customData?: {
     name: string
     description?: string
+    players?: {
+      min: number
+      max: number
+    }
+    duration?: number
+    imageUrl?: string
   }
   acquisitionDate?: string
   notes?: string
@@ -16,13 +22,20 @@ interface UpdateGame {
   notes?: string
   acquisitionDate?: string
   customData?: {
-    name: string
+    name?: string
     description?: string
+    players?: {
+      min?: number
+      max?: number
+    }
+    duration?: number
+    imageUrl?: string
   }
 }
 
 /**
  * Agrega un juego al inventario del usuario.
+ * Acepta juegos personalizados o referencias a catálogo.
  */
 export async function addGame(userId: string, data: Omit<GameBase, 'userId'>) {
   const newEntry = new UserInventory({ userId, ...data })
@@ -54,15 +67,20 @@ export async function deleteGame(userId: string, gameId: string): Promise<boolea
 }
 
 /**
- * Actualiza los campos permitidos de un juego del inventario.
- * Solo los juegos personalizados pueden cambiar nombre y descripción.
+ * Actualiza un juego del inventario del usuario.
+ * Permite sobrescribir datos incluso si el juego proviene del catálogo.
+ * La referencia (gameId) se conserva para trazabilidad.
  */
 export async function updateGame(userId: string, gameId: string, updates: UpdateGame) {
   const existing = await UserInventory.findOne({ _id: gameId, userId })
   if (!existing) return null
 
-  if (existing.source === 'custom' && updates.customData) {
-    existing.customData = updates.customData
+  // Permite personalizar campos de customData
+  if (updates.customData) {
+    existing.customData = {
+      ...existing.customData,
+      ...updates.customData
+    }
   }
 
   if (updates.notes !== undefined) {
@@ -70,10 +88,9 @@ export async function updateGame(userId: string, gameId: string, updates: Update
   }
 
   if (updates.acquisitionDate !== undefined) {
-    // Validación adicional: prevenir fechas inválidas
-    const parsedDate = new Date(updates.acquisitionDate)
-    if (!isNaN(parsedDate.getTime())) {
-      existing.acquisitionDate = parsedDate
+    const parsed = new Date(updates.acquisitionDate)
+    if (!isNaN(parsed.getTime())) {
+      existing.acquisitionDate = parsed
     }
   }
 

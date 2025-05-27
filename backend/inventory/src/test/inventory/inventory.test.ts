@@ -128,4 +128,29 @@ describe('Inventory routes', () => {
     })
     expect(response.statusCode).toBe(404)
   })
+
+  it('POST /inventory - añade juego con metadata extendida', async () => {
+  const response = await app.inject({
+    method: 'POST',
+    url: '/inventory',
+    payload: {
+      source: 'custom',
+      customData: {
+        name: 'Root',
+        description: 'Control de áreas con animales',
+        minPlayers: 2,
+        maxPlayers: 4,
+        playTime: 90,
+        imageUrl: 'https://example.com/root.jpg'
+      },
+      acquisitionDate: '2024-01-01',
+      notes: 'Muy temático'
+    },
+    headers: { authorization: 'Bearer test-token' }
+  })
+  expect(response.statusCode).toBe(201)
+  expect(response.json().data.customData.minPlayers).toBe(2)
+  expect(response.json().data.customData.imageUrl).toBe('https://example.com/root.jpg')
+})
+
 })

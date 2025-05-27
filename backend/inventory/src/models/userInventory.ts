@@ -9,6 +9,12 @@ export interface IUserInventory extends Document {
   customData?: {
     name: string
     description?: string
+    players?: {
+      min: number
+      max: number
+    }
+    duration?: number
+    imageUrl?: string
   }
   acquisitionDate?: Date
   notes?: string
@@ -36,9 +42,26 @@ const userInventorySchema = new Schema<IUserInventory>(
 
     customData: {
       type: new Schema({
-        name: { type: String, required(this: IUserInventory) { return this.source === 'custom' } },
-        description: String
-      }, { _id: false }) // Subdocumento sin _id
+        name: {
+          type: String,
+          required(this: IUserInventory) {
+            return this.source === 'custom'
+          }
+        },
+        description: { type: String },
+        players: {
+          type: new Schema(
+            {
+              min: Number,
+              max: Number
+            },
+            { _id: false }
+          ),
+          default: undefined
+        },
+        duration: { type: Number },
+        imageUrl: { type: String }
+      }, { _id: false })
     },
 
     acquisitionDate: Date,

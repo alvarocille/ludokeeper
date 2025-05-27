@@ -1,6 +1,6 @@
 # 🧩 Microservicio de Inventario – Juegos de Mesa 🎲
 
-Este microservicio forma parte de una aplicación modular orientada a la gestión personal de juegos de mesa. Desarrollado como parte del proyecto de fin de grado, este componente se encarga de almacenar, consultar y gestionar el inventario de juegos de un usuario autenticado.
+Este microservicio forma parte de una aplicación modular orientada a la gestión personal de juegos de mesa. Desarrollado como parte del proyecto de fin de grado, este componente se encarga de almacenar, consultar y gestionar el inventario de juegos de un usuario autenticado, permitiendo además personalizar la información asociada a cada juego, independientemente de si proviene de un catálogo público o ha sido creado por el usuario.
 
 ---
 
@@ -88,9 +88,9 @@ docker-compose up --build
 ```
 ### 5. Accede a la API
 #### Swagger UI:
-http://localhost:3001/docs
+http://localhost:3001/docs *(o el puerto configurado en tu `.env`)*
 #### Endpoint protegido de ejemplo:
-GET http://localhost:3001/inventory
+GET http://localhost:3001/inventory *(o el puerto configurado en tu `.env`)*
 
 ---
 
@@ -108,8 +108,8 @@ npm run test
 La API del microservicio está documentada automáticamente con Swagger y accesible desde:
 
 ```
-http://localhost:3001/docs
-```
+http://localhost:3001/docs (o el puerto configurado en tu `.env`)
+``` 
 
 #### Endpoints principales
 

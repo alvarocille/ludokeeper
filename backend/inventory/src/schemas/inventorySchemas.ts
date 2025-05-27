@@ -9,7 +9,11 @@ export const addGameSchema = z
     customData: z
       .object({
         name: z.string(),
-        description: z.string().optional()
+        description: z.string().optional(),
+        minPlayers: z.number().int().positive().optional(),
+        maxPlayers: z.number().int().positive().optional(),
+        playTime: z.number().int().positive().optional(),
+        imageUrl: z.string().url().optional()
       })
       .optional(),
     acquisitionDate: z.string().optional(),
@@ -30,8 +34,12 @@ export const updateGameSchema = z.object({
   acquisitionDate: z.string().datetime({ message: 'Debe ser un datetime ISO válido' }).optional(),
   customData: z
     .object({
-      name: z.string(),
-      description: z.string().optional()
+      name: z.string().optional(),
+      description: z.string().optional(),
+      minPlayers: z.number().int().positive().optional(),
+      maxPlayers: z.number().int().positive().optional(),
+      playTime: z.number().int().positive().optional(),
+      imageUrl: z.string().url().optional()
     })
     .optional()
 })
@@ -68,7 +76,11 @@ export const gameResponseSchema = {
       type: 'object',
       properties: {
         name: { type: 'string' },
-        description: { type: 'string' }
+        description: { type: 'string' },
+        minPlayers: { type: 'number' },
+        maxPlayers: { type: 'number' },
+        playTime: { type: 'number' },
+        imageUrl: { type: 'string', format: 'uri' }
       }
     },
     acquisitionDate: { type: 'string', format: 'date-time' },

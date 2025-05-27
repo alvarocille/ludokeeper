@@ -58,4 +58,33 @@ describe('inventoryService', () => {
     const deleted = await service.deleteGame('test-user-id', String(game._id))
     expect(deleted).toBe(true)
   })
+
+  it('debería añadir un juego con todos los campos personalizados', async () => {
+  const data = {
+    source: 'custom' as const,
+    customData: {
+      name: 'Terraforming Mars',
+      description: 'Coloniza Marte',
+      minPlayers: 1,
+      maxPlayers: 5,
+      playTime: 120,
+      imageUrl: 'https://example.com/tfm.jpg'
+    },
+    acquisitionDate: '2023-06-15',
+    notes: 'Partidas largas pero muy buenas'
+  }
+  const result = await service.addGame('test-user-id', data)
+  expect(result).toMatchObject({
+    userId: 'test-user-id',
+    source: 'custom',
+    customData: {
+      name: 'Terraforming Mars',
+      minPlayers: 1,
+      maxPlayers: 5,
+      playTime: 120,
+      imageUrl: 'https://example.com/tfm.jpg'
+    }
+  })
+})
+
 })
