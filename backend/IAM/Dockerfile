@@ -1,16 +1,19 @@
-FROM node:20
+FROM node:24-slim
 
-# Carpeta de trabajo dentro del contenedor
+# Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar los archivos del proyecto
+# Copiar solo archivos de dependencias primero
+COPY package*.json ./
+
+# Instalar solo dependencias de producción si NODE_ENV lo indica
+RUN npm install --omit=dev
+
+# Copiar el resto del proyecto
 COPY . .
 
-# Instalar dependencias
-RUN npm install
-
-# Puerto expuesto (opcional pero recomendable)
+# Exponer puerto
 EXPOSE 3000
 
-# Comando que ejecuta tu app
+# Comando por defecto
 CMD ["node", "src/server.js"]

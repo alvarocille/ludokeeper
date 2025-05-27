@@ -65,11 +65,11 @@ src/
 
 ---
 
-## 🚀 Instalación y uso local
-### 1. Clona el repositorio
+## 🚀 Instalación y uso local (para uso especifico del microservicio)
+### 1. Clona el repositorio completo
 ``` bash
-git clone https://github.com/tuusuario/inventory-service.git
-cd inventory-service
+git clone https://github.com/alvarocille/ludokeeper.git
+cd ludokeeper/backend/inventory
 ```
 ### 2. Crea los archivos de entorno
 ``` bash
