@@ -39,7 +39,6 @@ const userInventorySchema = new Schema<IUserInventory>(
         return this.source === 'catalog'
       }
     },
-
     customData: {
       type: new Schema({
         name: {
@@ -49,21 +48,12 @@ const userInventorySchema = new Schema<IUserInventory>(
           }
         },
         description: { type: String },
-        players: {
-          type: new Schema(
-            {
-              min: Number,
-              max: Number
-            },
-            { _id: false }
-          ),
-          default: undefined
-        },
-        duration: { type: Number },
+        minPlayers: { type: Number },
+        maxPlayers: { type: Number },
+        playTime: { type: Number },
         imageUrl: { type: String }
       }, { _id: false })
     },
-
     acquisitionDate: Date,
     notes: String
   },

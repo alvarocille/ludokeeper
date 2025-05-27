@@ -1,19 +1,12 @@
 import { UserInventory } from '../models/userInventory'
+import { CustomDataCreate, CustomDataUpdate } from '../types/customData'
 
+// Define GameBase y UpdateGame usando CustomDataBase
 interface GameBase {
   userId: string
   source: 'catalog' | 'custom'
   gameId?: string
-  customData?: {
-    name: string
-    description?: string
-    players?: {
-      min: number
-      max: number
-    }
-    duration?: number
-    imageUrl?: string
-  }
+  customData?: CustomDataCreate
   acquisitionDate?: string
   notes?: string
 }
@@ -21,21 +14,12 @@ interface GameBase {
 interface UpdateGame {
   notes?: string
   acquisitionDate?: string
-  customData?: {
-    name?: string
-    description?: string
-    players?: {
-      min?: number
-      max?: number
-    }
-    duration?: number
-    imageUrl?: string
-  }
+  customData?: CustomDataUpdate
 }
+
 
 /**
  * Agrega un juego al inventario del usuario.
- * Acepta juegos personalizados o referencias a catálogo.
  */
 export async function addGame(userId: string, data: Omit<GameBase, 'userId'>) {
   const newEntry = new UserInventory({ userId, ...data })
@@ -67,19 +51,19 @@ export async function deleteGame(userId: string, gameId: string): Promise<boolea
 }
 
 /**
- * Actualiza un juego del inventario del usuario.
- * Permite sobrescribir datos incluso si el juego proviene del catálogo.
- * La referencia (gameId) se conserva para trazabilidad.
+ * Actualiza los campos permitidos de un juego del inventario.
  */
 export async function updateGame(userId: string, gameId: string, updates: UpdateGame) {
   const existing = await UserInventory.findOne({ _id: gameId, userId })
   if (!existing) return null
 
-  // Permite personalizar campos de customData
   if (updates.customData) {
+    // Actualizar SOLO los campos presentes y garantizar que name no desaparezca
     existing.customData = {
       ...existing.customData,
-      ...updates.customData
+      ...updates.customData,
+      // Si updates.customData.name está undefined, mantener el name existente
+      name: updates.customData.name ?? existing.customData?.name ?? ''
     }
   }
 
@@ -88,12 +72,13 @@ export async function updateGame(userId: string, gameId: string, updates: Update
   }
 
   if (updates.acquisitionDate !== undefined) {
-    const parsed = new Date(updates.acquisitionDate)
-    if (!isNaN(parsed.getTime())) {
-      existing.acquisitionDate = parsed
+    const parsedDate = new Date(updates.acquisitionDate)
+    if (!isNaN(parsedDate.getTime())) {
+      existing.acquisitionDate = parsedDate
     }
   }
 
   await existing.save()
   return existing
 }
+
