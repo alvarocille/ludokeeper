@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
-  inventory-service:
+  catalog-service:
     build: .
-    container_name: inventory-service
+    container_name: catalog-service
     ports:
-      - "3001:3001"
+      - "3002:3002"
     environment:
-      PORT: 3001
-      MONGODB_URI: mongodb://mongo_inventory:27017/inventory
+      PORT: 3002
+      MONGODB_URI: mongodb://mongo_catalog:27017/catalog
       JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key.pem
     secrets:
       - jwt_public_key.pem
@@ -18,11 +16,11 @@ services:
 
   mongo:
     image: mongo:6
-    container_name: mongo_inventory
+    container_name: mongo_catalog
     ports:
-      - "27019:27017"
+      - "27018:27017"
     volumes:
-      - mongo_inventory_data:/data/db
+      - mongo_catalog_data:/data/db
     restart: unless-stopped
 
 secrets:
@@ -30,4 +28,4 @@ secrets:
     file: ./public_key.pem
 
 volumes:
-  mongo_inventory_data:
+  mongo_catalog_data:

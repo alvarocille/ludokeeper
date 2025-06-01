@@ -91,7 +91,23 @@ export const gameResponseSchema = {
   }
 }
 
+// 🔍 Esquema para filtros por query
+export const inventoryQuerySchema = z.object({
+  name: z.string().optional(),
+  category: z.string().optional(),
+  mechanic: z.string().optional(),
+  year: z.string().regex(/^\d{4}$/, 'Año inválido').optional()
+})
+
+// 📦 JSON Schema para validación de filtros
+export const inventoryQueryJsonSchema = {
+  querystring: zodToJsonSchema(inventoryQuerySchema)
+}
+
 // 🧩 Para Swagger (components.schemas)
 export const addGameSchemaRef = zodToJsonSchema(addGameSchema, { name: 'AddGame' })
 export const updateGameSchemaRef = zodToJsonSchema(updateGameSchema, { name: 'UpdateGame' })
 export const idParamSchemaRef = zodToJsonSchema(idParamSchema, { name: 'IdParam' })
+export const inventoryQuerySchemaRef = zodToJsonSchema(inventoryQuerySchema, {
+  name: 'InventoryQuery'
+})

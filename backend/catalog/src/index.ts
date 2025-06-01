@@ -1,19 +1,19 @@
+import Fastify from 'fastify'
 import fastifyJWT from '@fastify/jwt'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
 import dotenv from 'dotenv'
-import Fastify from 'fastify'
 import fs from 'fs'
 import path from 'path'
 
-import { authenticate } from './middlewares/auth'
-import { inventoryRoutes } from './routes/inventoryRoutes'
-import {
-  addGameSchemaRef,
-  idParamSchemaRef,
-  updateGameSchemaRef
-} from './schemas/inventorySchemas';
+import { catalogRoutes } from './routes/catalogRoutes'
+import { requireAdmin, authenticate } from './middlewares/auth'
 import { connectDB } from './utils/db'
+import {
+  addCatalogGameSchemaRef,
+  updateCatalogGameSchemaRef,
+  idParamSchemaRef
+} from './schemas/catalogSchemas' // Asegúrate de tener estos exports
 
 dotenv.config()
 
@@ -31,7 +31,7 @@ async function main() {
     const publicKey = fs.readFileSync(publicKeyPath, 'utf8')
 
     // 🔐 Registro de JWT con clave pública
-    await app.register(fastifyJWT, {
+    await app.register(fastifyJWT as any, {
       secret: {
         public: publicKey,
         format: 'pem',
@@ -39,15 +39,17 @@ async function main() {
       }
     })
 
-    // 📘 Registro de Swagger (OpenAPI)
-    await app.register(fastifySwagger, {
+
+
+    // 📄 Swagger OpenAPI
+    await app.register(fastifySwagger as any, {
       openapi: {
         info: {
-          title: 'Inventory API',
+          title: 'Catálogo de Juegos de Mesa',
           version: '1.0.0',
-          description: 'Microservicio para gestionar el inventario de juegos de mesa'
+          description: 'Microservicio para la gestión del catálogo público de juegos de mesa'
         },
-        servers: [{ url: process.env.SWAGGER_SERVER_URL || 'http://localhost:3001' }],
+        servers: [{ url: process.env.SWAGGER_SERVER_URL || 'http://localhost:3002' }],
         components: {
           securitySchemes: {
             bearerAuth: {
@@ -57,9 +59,9 @@ async function main() {
             }
           },
           schemas: {
-            AddGame: addGameSchemaRef,        // Schema POST
-            UpdateGame: updateGameSchemaRef,  // Schema PUT
-            IdParam: idParamSchemaRef         // Schema params
+            AddGame: addCatalogGameSchemaRef,
+            UpdateGame: updateCatalogGameSchemaRef,
+            IdParam: idParamSchemaRef
           }
         },
         security: [{ bearerAuth: [] }]
@@ -75,25 +77,25 @@ async function main() {
       }
     })
 
-    // 🗄️ Conexión a MongoDB
+    // 📦 MongoDB
     await connectDB()
 
-    // 🚏 Registro de rutas con autenticación
-    await inventoryRoutes(app, authenticate)
+    // 🛣️ Rutas del catálogo
+    await catalogRoutes(app, { authenticate, requireAdmin })
 
     // 🧯 Manejador global de errores
-    app.setErrorHandler((error, reply) => {
+    app.setErrorHandler((error, request, reply) => {
       app.log.error(error)
-      reply.status(error.statusCode || 500).send({
+      reply.code(error.statusCode || 500).send({
         error: 'Error interno del servidor',
         message: error.message
       })
     })
 
-    // 🚀 Lanzamiento del servidor
-    const PORT = parseInt(process.env.PORT || '3001', 10)
+    // 🚀 Lanzar servidor
+    const PORT = parseInt(process.env.PORT || '3002', 10)
     await app.listen({ port: PORT, host: '0.0.0.0' })
-    console.log(`🚀 Servidor iniciado en http://localhost:${PORT}`)
+    console.log(`🚀 Catálogo iniciado en http://localhost:${PORT}/docs`)
   } catch (err) {
     console.error('❌ Error crítico al iniciar el servidor:', err)
     process.exit(1)

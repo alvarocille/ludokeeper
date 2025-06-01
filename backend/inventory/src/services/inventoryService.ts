@@ -1,3 +1,44 @@
+import { IUserInventory } from '../models/userInventory'
+
+export async function createCatalogGame(data: any) {
+  const exists = await CatalogGame.findOne({ name: data.name })
+  if (exists) throw new Error('El juego ya existe')
+
+  const game = new IUserInventory(data)
+  await game.save()
+  return game
+}
+
+export async function listCatalogGames(filters: Record<string, string>) {
+  const {
+    name, category, mechanic, publisher, minPlayers, maxPlayers, yearPublished
+  } = filters
+
+  const query: Record<string, any> = {}
+  if (name) query.name = new RegExp(name, 'i')
+  if (category) query.categories = category
+  if (mechanic) query.mechanics = mechanic
+  if (publisher) query.publisher = publisher
+  if (yearPublished) query.yearPublished = parseInt(yearPublished)
+  if (minPlayers) query.minPlayers = { $gte: parseInt(minPlayers) }
+  if (maxPlayers) query.maxPlayers = { $lte: parseInt(maxPlayers) }
+
+  return await CatalogGame.find(query)
+}
+
+export async function getCatalogGameById(id: string) {
+  return await CatalogGame.findById(id)
+}
+
+export async function updateCatalogGame(id: string, data: any) {
+  return await CatalogGame.findByIdAndUpdate(id, data, { new: true })
+}
+
+export async function deleteCatalogGame(id: string): Promise<boolean> {
+  const deleted = await CatalogGame.findByIdAndDelete(id)
+  return !!deleted
+}
+
 import { UserInventory } from '../models/userInventory'
 import { CustomDataCreate, CustomDataUpdate } from '../types/customData'
 
@@ -30,9 +71,17 @@ export async function addGame(userId: string, data: Omit<GameBase, 'userId'>) {
 /**
  * Devuelve todos los juegos del inventario de un usuario ordenados por fecha.
  */
-export async function getUserInventory(userId: string) {
-  return await UserInventory.find({ userId }).sort({ createdAt: -1 })
+export async function getUserInventory(userId: string, filters: Record<string, string> = {}) {
+  const query: any = { userId }
+
+  if (filters.name) query['customData.name'] = new RegExp(filters.name, 'i')
+  if (filters.category) query['customData.categories'] = filters.category
+  if (filters.mechanic) query['customData.mechanics'] = filters.mechanic
+  if (filters.year) query['customData.yearPublished'] = parseInt(filters.year)
+
+  return UserInventory.find(query)
 }
+
 
 /**
  * Busca un juego específico del inventario del usuario por ID.
@@ -81,4 +130,5 @@ export async function updateGame(userId: string, gameId: string, updates: Update
   await existing.save()
   return existing
 }
+
 

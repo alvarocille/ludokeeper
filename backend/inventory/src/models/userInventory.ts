@@ -1,25 +1,23 @@
-import { Document, model, Schema, Types } from 'mongoose'
+import { model, Schema, Types } from 'mongoose'
 
 export type InventorySource = 'catalog' | 'custom'
 
-export interface IUserInventory extends Document {
+export interface IUserInventory {
   userId: string
   source: InventorySource
   gameId?: Types.ObjectId
   customData?: {
     name: string
     description?: string
-    players?: {
-      min: number
-      max: number
-    }
-    duration?: number
+    minPlayers?: number
+    maxPlayers?: number
+    playTime?: number
     imageUrl?: string
   }
   acquisitionDate?: Date
   notes?: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 const userInventorySchema = new Schema<IUserInventory>(
@@ -34,26 +32,31 @@ const userInventorySchema = new Schema<IUserInventory>(
 
     gameId: {
       type: Schema.Types.ObjectId,
-      ref: 'Game',
-      required(this: IUserInventory) {
+      ref: 'CatalogGame',
+      required: function (this: IUserInventory) {
         return this.source === 'catalog'
       }
     },
+
     customData: {
-      type: new Schema({
-        name: {
-          type: String,
-          required(this: IUserInventory) {
-            return this.source === 'custom'
-          }
+      type: new Schema(
+        {
+          name: {
+            type: String,
+            required: function (this: IUserInventory) {
+              return this.source === 'custom'
+            }
+          },
+          description: { type: String },
+          minPlayers: { type: Number },
+          maxPlayers: { type: Number },
+          playTime: { type: Number },
+          imageUrl: { type: String }
         },
-        description: { type: String },
-        minPlayers: { type: Number },
-        maxPlayers: { type: Number },
-        playTime: { type: Number },
-        imageUrl: { type: String }
-      }, { _id: false })
+        { _id: false }
+      )
     },
+
     acquisitionDate: Date,
     notes: String
   },

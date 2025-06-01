@@ -27,12 +27,20 @@ export async function addGame(request, reply) {
  */
 export async function getUserInventory(request, reply) {
   const user = request.user as AuthenticatedUser
-  const inventory = await inventoryService.getUserInventory(user.sub)
+  const query = request.query as {
+    name?: string
+    category?: string
+    mechanic?: string
+    year?: string
+  }
+
+  const inventory = await inventoryService.getUserInventory(user.sub, query)
 
   return reply.send({
     data: inventory.map(g => g.toObject({ versionKey: false }))
   })
 }
+
 
 /**
  * GET /inventory/:id

@@ -4,7 +4,8 @@ import {
   addGameSchema,
   updateGameSchema,
   idParamSchema,
-  gameResponseSchema
+  gameResponseSchema,
+  inventoryQueryJsonSchema
 } from '../schemas/inventorySchemas'
 import { isValidObjectId } from '../utils/isValidObjectId'
 import { zodToJsonSchema } from 'zod-to-json-schema'
@@ -52,7 +53,8 @@ export async function inventoryRoutes(app, authenticate = realAuthenticate) {
     preHandler: authenticate,
     schema: {
       tags: ['Inventario'],
-      summary: 'Listar juegos del usuario',
+      summary: 'Listar juegos del usuario con filtros',
+      querystring: inventoryQueryJsonSchema.querystring,
       response: {
         200: {
           type: 'object',
@@ -66,6 +68,7 @@ export async function inventoryRoutes(app, authenticate = realAuthenticate) {
       }
     }
   }, inventoryController.getUserInventory)
+
 
   // Obtener un juego específico por su ID
   app.get('/inventory/:id', {
