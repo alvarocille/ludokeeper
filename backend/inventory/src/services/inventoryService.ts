@@ -1,48 +1,6 @@
-import { IUserInventory } from '../models/userInventory'
-
-export async function createCatalogGame(data: any) {
-  const exists = await CatalogGame.findOne({ name: data.name })
-  if (exists) throw new Error('El juego ya existe')
-
-  const game = new IUserInventory(data)
-  await game.save()
-  return game
-}
-
-export async function listCatalogGames(filters: Record<string, string>) {
-  const {
-    name, category, mechanic, publisher, minPlayers, maxPlayers, yearPublished
-  } = filters
-
-  const query: Record<string, any> = {}
-  if (name) query.name = new RegExp(name, 'i')
-  if (category) query.categories = category
-  if (mechanic) query.mechanics = mechanic
-  if (publisher) query.publisher = publisher
-  if (yearPublished) query.yearPublished = parseInt(yearPublished)
-  if (minPlayers) query.minPlayers = { $gte: parseInt(minPlayers) }
-  if (maxPlayers) query.maxPlayers = { $lte: parseInt(maxPlayers) }
-
-  return await CatalogGame.find(query)
-}
-
-export async function getCatalogGameById(id: string) {
-  return await CatalogGame.findById(id)
-}
-
-export async function updateCatalogGame(id: string, data: any) {
-  return await CatalogGame.findByIdAndUpdate(id, data, { new: true })
-}
-
-export async function deleteCatalogGame(id: string): Promise<boolean> {
-  const deleted = await CatalogGame.findByIdAndDelete(id)
-  return !!deleted
-}
-
 import { UserInventory } from '../models/userInventory'
 import { CustomDataCreate, CustomDataUpdate } from '../types/customData'
 
-// Define GameBase y UpdateGame usando CustomDataBase
 interface GameBase {
   userId: string
   source: 'catalog' | 'custom'
@@ -58,60 +16,99 @@ interface UpdateGame {
   customData?: CustomDataUpdate
 }
 
-
-/**
- * Agrega un juego al inventario del usuario.
- */
 export async function addGame(userId: string, data: Omit<GameBase, 'userId'>) {
   const newEntry = new UserInventory({ userId, ...data })
   await newEntry.save()
   return newEntry
 }
 
-/**
- * Devuelve todos los juegos del inventario de un usuario ordenados por fecha.
- */
 export async function getUserInventory(userId: string, filters: Record<string, string> = {}) {
-  const query: any = { userId }
+  const match: any = { userId }
+  const andConditions: any[] = []
 
-  if (filters.name) query['customData.name'] = new RegExp(filters.name, 'i')
-  if (filters.category) query['customData.categories'] = filters.category
-  if (filters.mechanic) query['customData.mechanics'] = filters.mechanic
-  if (filters.year) query['customData.yearPublished'] = parseInt(filters.year)
+  if (filters.name) {
+    const regex = new RegExp(filters.name, 'i')
+    andConditions.push({
+      $or: [
+        { 'customData.name': regex },
+        { 'gameId.name': regex }
+      ]
+    })
+  }
 
-  return UserInventory.find(query)
+  if (filters.category) {
+    andConditions.push({ 'gameId.categories': filters.category })
+  }
+
+  if (filters.mechanic) {
+    andConditions.push({ 'gameId.mechanics': filters.mechanic })
+  }
+
+  if (filters.year) {
+    const year = parseInt(filters.year)
+    if (!isNaN(year)) {
+      andConditions.push({ 'gameId.yearPublished': year })
+    }
+  }
+
+  if (filters.minPlayers) {
+    const min = parseInt(filters.minPlayers)
+    if (!isNaN(min)) {
+      andConditions.push({
+        $or: [
+          { 'customData.minPlayers': { $lte: min } },
+          { 'gameId.minPlayers': { $lte: min } }
+        ]
+      })
+    }
+  }
+
+  if (filters.maxPlayers) {
+    const max = parseInt(filters.maxPlayers)
+    if (!isNaN(max)) {
+      andConditions.push({
+        $or: [
+          { 'customData.maxPlayers': { $gte: max } },
+          { 'gameId.maxPlayers': { $gte: max } }
+        ]
+      })
+    }
+  }
+
+  if (filters.source === 'catalog' || filters.source === 'custom') {
+    match.source = filters.source
+  }
+
+  const finalQuery = andConditions.length > 0
+    ? { ...match, $and: andConditions }
+    : match
+
+  return UserInventory.find(finalQuery).populate({
+    path: 'gameId',
+    select: 'name categories mechanics yearPublished minPlayers maxPlayers'
+  })
 }
 
 
-/**
- * Busca un juego específico del inventario del usuario por ID.
- */
+
+
 export async function getGameById(userId: string, gameId: string) {
   return await UserInventory.findOne({ _id: gameId, userId })
 }
 
-/**
- * Elimina un juego del inventario.
- * Devuelve true si se eliminó, false si no se encontró.
- */
 export async function deleteGame(userId: string, gameId: string): Promise<boolean> {
   const deleted = await UserInventory.findOneAndDelete({ _id: gameId, userId })
   return !!deleted
 }
 
-/**
- * Actualiza los campos permitidos de un juego del inventario.
- */
 export async function updateGame(userId: string, gameId: string, updates: UpdateGame) {
   const existing = await UserInventory.findOne({ _id: gameId, userId })
   if (!existing) return null
 
   if (updates.customData) {
-    // Actualizar SOLO los campos presentes y garantizar que name no desaparezca
     existing.customData = {
       ...existing.customData,
       ...updates.customData,
-      // Si updates.customData.name está undefined, mantener el name existente
       name: updates.customData.name ?? existing.customData?.name ?? ''
     }
   }
@@ -130,5 +127,3 @@ export async function updateGame(userId: string, gameId: string, updates: Update
   await existing.save()
   return existing
 }
-
-

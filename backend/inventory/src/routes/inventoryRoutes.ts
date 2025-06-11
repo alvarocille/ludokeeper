@@ -12,12 +12,11 @@ import { zodToJsonSchema } from 'zod-to-json-schema'
 
 // Registra todas las rutas del inventario con validación y Swagger
 export async function inventoryRoutes(app, authenticate = realAuthenticate) {
-  // Valida que el ID tenga formato Mongo antes de llegar al controlador
-  const validateId = (request, reply, done) => {
+  // Validación moderna del ID usando async y throw controlado
+  const validateId = async (request, reply) => {
     if (!isValidObjectId(request.params.id)) {
       return reply.code(400).send({ error: 'ID inválido' })
     }
-    done()
   }
 
   // Crear un juego en el inventario
@@ -68,7 +67,6 @@ export async function inventoryRoutes(app, authenticate = realAuthenticate) {
       }
     }
   }, inventoryController.getUserInventory)
-
 
   // Obtener un juego específico por su ID
   app.get('/inventory/:id', {

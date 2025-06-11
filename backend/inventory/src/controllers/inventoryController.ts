@@ -1,6 +1,7 @@
 import { addGameSchema, updateGameSchema } from '../schemas/inventorySchemas'
 import * as inventoryService from '../services/inventoryService'
 import { AuthenticatedUser } from '../test/types/global'
+import { inventoryQuerySchema } from '../schemas/inventorySchemas'
 
 /**
  * POST /inventory
@@ -27,14 +28,19 @@ export async function addGame(request, reply) {
  */
 export async function getUserInventory(request, reply) {
   const user = request.user as AuthenticatedUser
-  const query = request.query as {
-    name?: string
-    category?: string
-    mechanic?: string
-    year?: string
+
+  // Validación segura del query usando el schema de Zod
+  const parsed = inventoryQuerySchema.safeParse(request.query)
+
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: 'Parámetros de filtro inválidos',
+      details: parsed.error.format()
+    })
   }
 
-  const inventory = await inventoryService.getUserInventory(user.sub, query)
+  const filters = parsed.data
+  const inventory = await inventoryService.getUserInventory(user.sub, filters)
 
   return reply.send({
     data: inventory.map(g => g.toObject({ versionKey: false }))

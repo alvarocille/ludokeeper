@@ -23,14 +23,14 @@ async function main() {
   })
 
   try {
-    // ✅ Validación robusta de clave pública
+    // Validación robusta de clave pública
     const publicKeyPath = path.resolve(process.env.JWT_PUBLIC_KEY_PATH || './public_key.pem')
     if (!fs.existsSync(publicKeyPath)) {
       throw new Error(`🔒 No se encontró el archivo de clave pública: ${publicKeyPath}`)
     }
     const publicKey = fs.readFileSync(publicKeyPath, 'utf8')
 
-    // 🔐 Registro de JWT con clave pública
+    // Registro de JWT con clave pública
     await app.register(fastifyJWT, {
       secret: {
         public: publicKey,
@@ -39,7 +39,7 @@ async function main() {
       }
     })
 
-    // 📘 Registro de Swagger (OpenAPI)
+    // Registro de Swagger (OpenAPI)
     await app.register(fastifySwagger, {
       openapi: {
         info: {
@@ -75,14 +75,14 @@ async function main() {
       }
     })
 
-    // 🗄️ Conexión a MongoDB
+    // Conexión a MongoDB
     await connectDB()
 
-    // 🚏 Registro de rutas con autenticación
+    // Registro de rutas con autenticación
     await inventoryRoutes(app, authenticate)
 
-    // 🧯 Manejador global de errores
-    app.setErrorHandler((error, reply) => {
+    // Manejador global de errores
+    app.setErrorHandler((error, request, reply) => {
       app.log.error(error)
       reply.status(error.statusCode || 500).send({
         error: 'Error interno del servidor',
@@ -90,7 +90,8 @@ async function main() {
       })
     })
 
-    // 🚀 Lanzamiento del servidor
+
+    // Lanzamiento del servidor
     const PORT = parseInt(process.env.PORT || '3001', 10)
     await app.listen({ port: PORT, host: '0.0.0.0' })
     console.log(`🚀 Servidor iniciado en http://localhost:${PORT}`)

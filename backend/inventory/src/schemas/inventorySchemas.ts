@@ -91,13 +91,16 @@ export const gameResponseSchema = {
   }
 }
 
-// 🔍 Esquema para filtros por query
 export const inventoryQuerySchema = z.object({
   name: z.string().optional(),
   category: z.string().optional(),
   mechanic: z.string().optional(),
-  year: z.string().regex(/^\d{4}$/, 'Año inválido').optional()
+  year: z.string().regex(/^\d{4}$/, 'Año inválido').optional(),
+  minPlayers: z.string().regex(/^\d+$/, 'Debe ser un número entero').optional(),
+  maxPlayers: z.string().regex(/^\d+$/, 'Debe ser un número entero').optional(),
+  source: z.enum(['catalog', 'custom']).optional()
 })
+
 
 // 📦 JSON Schema para validación de filtros
 export const inventoryQueryJsonSchema = {
