@@ -1,13 +1,28 @@
 import { Stack } from "expo-router";
-import { Text, useColorScheme, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  useColorScheme,
+  useWindowDimensions,
+} from "react-native";
 import { BackButton } from "src/components/button/BackButton";
-import { colors } from "src/styles/colors";
-import { fonts } from "src/styles/fonts";
-import { screenStyles } from "src/styles/screen";
+import { ThemeMode, useThemeStore } from "src/store/themeStore";
+import { useAppTheme } from "src/styles/useAppTheme";
+import { useScreenStyles } from "src/styles/useScreenStyles";
+
+const themeOptions: { label: string; value: ThemeMode }[] = [
+  { label: "Claro", value: "light" },
+  { label: "Oscuro", value: "dark" },
+  { label: "Sistema", value: "system" },
+];
 
 export default function SettingsScreen() {
-  const theme = useColorScheme();
-  const themeColors = colors[theme ?? "light"];
+  const { colors, fonts } = useAppTheme();
+  const styles = useScreenStyles();
+  const { width } = useWindowDimensions();
+  const systemTheme = useColorScheme();
+  const { themeMode, setThemeMode } = useThemeStore();
 
   return (
     <>
@@ -15,28 +30,87 @@ export default function SettingsScreen() {
         options={{
           title: "Configuración",
           headerShown: true,
-          headerStyle: {
-            backgroundColor: themeColors.background,
-          },
+          headerStyle: { backgroundColor: colors.background },
           headerTitleStyle: {
-            color: themeColors.text,
+            color: colors.text,
             fontFamily: fonts.heading,
             fontSize: 20,
           },
-          headerTintColor: themeColors.secondary,
+          headerTintColor: colors.secondary,
           headerLeft: () => <BackButton />,
         }}
       />
-      <View
-        style={[
-          screenStyles.container,
-          { backgroundColor: themeColors.background },
-        ]}
+
+      <ScrollView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "flex-start",
+          paddingHorizontal: 24,
+          paddingVertical: 32,
+        }}
       >
-        <Text style={[screenStyles.title, { color: themeColors.text }]}>
-          Configuración
+        <Text style={styles.title}>Apariencia</Text>
+
+        <Text
+          style={{
+            ...styles.itemText,
+            marginBottom: 12,
+          }}
+        >
+          Selecciona el modo de tema preferido:
         </Text>
-      </View>
+
+        {themeOptions.map((option) => {
+          const isSelected = themeMode === option.value;
+
+          return (
+            <Pressable
+              key={option.value}
+              onPress={() => setThemeMode(option.value)}
+              style={{
+                backgroundColor: isSelected
+                  ? colors.secondary + "33"
+                  : colors.primary,
+                borderColor: colors.secondary,
+                borderWidth: isSelected ? 2 : 1,
+                padding: 12,
+                borderRadius: 12,
+                marginBottom: 12,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: fonts.text,
+                  color: colors.text,
+                  fontSize: 16,
+                  textAlign: "center",
+                }}
+              >
+                {option.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+
+        <Text
+          style={{
+            ...styles.title,
+            marginTop: 32,
+          }}
+        >
+          Idioma
+        </Text>
+
+        <Text
+          style={{
+            ...styles.itemText,
+            marginBottom: 12,
+          }}
+        >
+          (Próximamente) Selección de idioma para la aplicación.
+        </Text>
+      </ScrollView>
     </>
   );
 }

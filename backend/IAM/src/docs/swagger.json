@@ -144,6 +144,67 @@
         }
       }
     },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refrescar token de acceso usando refresh_token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "refresh_token": "eyJhbGciOiJIUzI1..."
+              },
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refresh_token": { "type": "string" }
+                },
+                "required": ["refresh_token"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refrescado con éxito",
+            "content": {
+              "application/json": {
+                "example": {
+                  "access_token": "eyJhbGciOiJIUzI1...",
+                  "refresh_token": "eyJhbGciOiJIUzI1...",
+                  "expires_in": 300,
+                  "refresh_expires_in": 1800,
+                  "token_type": "Bearer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Refresh token no proporcionado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Refresh token requerido"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Refresh token inválido o expirado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "No se pudo refrescar el token"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
     "/rol/admin": {
       "get": {
         "summary": "Ruta protegida (solo admins)",

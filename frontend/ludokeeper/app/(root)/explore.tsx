@@ -1,21 +1,10 @@
-import { Text, useColorScheme, View } from "react-native";
-import { colors } from "src/styles/colors";
-import { screenStyles } from "src/styles/screen";
+import { View } from "react-native";
+import { useAppTheme } from "src/styles/useAppTheme";
+import { useScreenStyles } from "src/styles/useScreenStyles";
 
-export default function ExploreScreen() {
-  const theme = useColorScheme();
-  const themeColors = colors[theme ?? "light"];
+export default function MenuScreen() {
+  const { colors } = useAppTheme();
+  const styles = useScreenStyles();
 
-  return (
-    <View
-      style={[
-        screenStyles.container,
-        { backgroundColor: themeColors.background },
-      ]}
-    >
-      <Text style={[screenStyles.title, { color: themeColors.text }]}>
-        Explorar
-      </Text>
-    </View>
-  );
+  return <View style={styles.container}></View>;
 }

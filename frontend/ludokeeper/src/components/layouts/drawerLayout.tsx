@@ -1,34 +1,31 @@
 import { Slot } from "expo-router";
 import { Drawer } from "expo-router/drawer";
-import { useColorScheme } from "react-native";
 import { navigationItems } from "src/constants/navItems";
-import { colors } from "src/styles/colors";
-import { fonts } from "src/styles/fonts";
+import { useAppTheme } from "src/styles/useAppTheme";
 
 export default function DrawerLayout() {
-  const theme = useColorScheme();
-  const themeColors = colors[theme ?? "light"];
+  const { colors, fonts } = useAppTheme();
 
   return (
     <Drawer
       screenOptions={{
         headerShown: true,
         drawerStyle: {
-          backgroundColor: themeColors.background,
+          backgroundColor: colors.background,
         },
         drawerLabelStyle: {
-          color: themeColors.text,
+          color: colors.text,
           fontFamily: fonts.text,
         },
         headerStyle: {
-          backgroundColor: themeColors.background,
+          backgroundColor: colors.background,
         },
         headerTitleStyle: {
-          color: themeColors.text,
+          color: colors.text,
           fontFamily: fonts.heading,
           fontSize: 20,
         },
-        headerTintColor: themeColors.secondary,
+        headerTintColor: colors.secondary,
       }}
     >
       {navigationItems.map((item) => (

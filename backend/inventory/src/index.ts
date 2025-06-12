@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import Fastify from 'fastify'
 import fs from 'fs'
 import path from 'path'
+import cors from '@fastify/cors'
 
 import { authenticate } from './middlewares/auth'
 import { inventoryRoutes } from './routes/inventoryRoutes'
@@ -23,6 +24,13 @@ async function main() {
   })
 
   try {
+    await app.register(cors, {
+      origin: ['http://localhost:8081'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+    });
+
     // Validación robusta de clave pública
     const publicKeyPath = path.resolve(process.env.JWT_PUBLIC_KEY_PATH || './public_key.pem')
     if (!fs.existsSync(publicKeyPath)) {

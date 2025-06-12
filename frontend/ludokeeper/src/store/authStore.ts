@@ -1,51 +1,121 @@
+import { AUTH_API_URL } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { Alert, Platform } from "react-native";
 import { create } from "zustand";
 
 interface AuthState {
   token: string | null;
+  refreshToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   loadToken: () => Promise<void>;
-  setToken: (token: string) => Promise<void>;
+  setToken: (token: string, refreshToken: string) => Promise<void>;
+  refreshSession: () => Promise<boolean>;
   logout: () => Promise<boolean>;
 }
 
+let refreshInterval: number | null = null;
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
+  refreshToken: null,
   isLoading: true,
   isAuthenticated: false,
 
   loadToken: async () => {
     console.log("[Auth] Ejecutando loadToken()");
     try {
-      const storedToken = await AsyncStorage.getItem("token");
-      console.log("[Auth] Token cargado:", storedToken);
+      const token = await AsyncStorage.getItem("token");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+      if (!token || !refreshToken || refreshToken.length < 20) {
+        console.warn("[Auth] No se encontró un refreshToken válido");
+        set({ isLoading: false });
+        return;
+      }
 
       set({
-        token: storedToken,
-        isAuthenticated: !!storedToken,
+        token,
+        refreshToken,
+        isAuthenticated: true,
         isLoading: false,
       });
+
+      console.log("[Auth] Tokens cargados desde AsyncStorage");
+
+      // Lanza refresco automático tras cargar sesión
+      if (refreshInterval) clearInterval(refreshInterval);
+      refreshInterval = setInterval(
+        () => {
+          console.log("[Auth] ⏰ Refrescando token por intervalo...");
+          get().refreshSession();
+        },
+        4 * 60 * 1000,
+      ); // cada 4 minutos
     } catch (err) {
-      console.error("[Auth] Error al cargar el token:", err);
+      console.error("[Auth] Error en loadToken:", err);
       set({ isLoading: false });
     }
   },
 
-  setToken: async (token: string) => {
+  setToken: async (token: string, refreshToken: string) => {
     try {
       await AsyncStorage.setItem("token", token);
-      const confirmed = await AsyncStorage.getItem("token");
-      console.log("[Auth] Token guardado:", confirmed);
+      await AsyncStorage.setItem("refreshToken", refreshToken);
 
       set({
         token,
+        refreshToken,
         isAuthenticated: true,
         isLoading: false,
       });
+
+      // Activa el temporizador de refresh
+      if (refreshInterval) clearInterval(refreshInterval);
+      refreshInterval = setInterval(
+        () => {
+          console.log("[Auth] ⏰ Refrescando token por intervalo...");
+          get().refreshSession();
+        },
+        4 * 60 * 1000,
+      ); // cada 4 minutos
     } catch (err) {
-      console.error("[Auth] Error al guardar el token:", err);
+      console.error("[Auth] Error al guardar tokens:", err);
+    }
+  },
+
+  refreshSession: async () => {
+    try {
+      const refreshToken =
+        get().refreshToken || (await AsyncStorage.getItem("refreshToken"));
+      if (!refreshToken || refreshToken.length < 20)
+        throw new Error("No refresh token válido disponible");
+
+      console.log("[Auth] Solicitando nuevo token con refresh_token...");
+
+      const res = await axios.post(`${AUTH_API_URL}/auth/refresh`, {
+        refresh_token: refreshToken,
+      });
+
+      const { access_token, refresh_token } = res.data;
+
+      await AsyncStorage.setItem("token", access_token);
+      await AsyncStorage.setItem("refreshToken", refresh_token);
+
+      set({
+        token: access_token,
+        refreshToken: refresh_token,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      console.log("[Auth] ✅ Token refrescado correctamente");
+      return true;
+    } catch (err) {
+      console.error("[Auth] ❌ Error al refrescar token:", err);
+      await get().logout();
+      return false;
     }
   },
 
@@ -78,17 +148,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       console.log("[Auth] Ejecutando logout...");
-      await AsyncStorage.removeItem("token");
-      const check = await AsyncStorage.getItem("token");
-      console.log("[Auth] Token tras logout:", check);
+      await AsyncStorage.multiRemove(["token", "refreshToken"]);
+
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+      }
 
       set({
         token: null,
+        refreshToken: null,
         isAuthenticated: false,
         isLoading: false,
       });
 
-      console.log("[Auth] Estado actualizado tras logout:", get());
       return true;
     } catch (err) {
       console.error("[Auth] Error al cerrar sesión:", err);

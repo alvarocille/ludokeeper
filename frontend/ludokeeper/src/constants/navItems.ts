@@ -43,3 +43,21 @@ export const menuItems: {
     route: null,
   },
 ];
+
+export const toolItems = [
+  {
+    title: "Simulador de Dado",
+    icon: "dice-outline",
+    route: "/(tools)/dice",
+  },
+  {
+    title: "Temporizador de Turno",
+    icon: "timer-outline",
+    route: "/(tools)/timer",
+  },
+  {
+    title: "Cronómetro de Acción",
+    icon: "flash-outline",
+    route: "/(tools)/stopwatch",
+  },
+];

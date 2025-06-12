@@ -104,6 +104,7 @@ http://localhost:3000/docs
 |--------|----------------------|--------------------------------------------|
 | POST   | `/auth/register`     | Registra un nuevo usuario                  |
 | POST   | `/auth/login`        | Inicia sesión y devuelve un token JWT      |
+| POST   | `/auth/refresh`      | Refresca el token JWT del usuario activo   |
 | GET    | `/rol/admin`         | Ruta protegida, accesible solo por admins  |
 | GET    | `/rol/jugador`       | Ruta protegida, accesible solo por jugadores |
 

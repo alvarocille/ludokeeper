@@ -1,13 +1,10 @@
+import { navigationItems } from "src/constants/navItems";
+import { useAppTheme } from "src/styles/useAppTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { Slot, Tabs } from "expo-router";
-import { useColorScheme } from "react-native";
-import { navigationItems } from "src/constants/navItems";
-import { colors } from "src/styles/colors";
-import { fonts } from "src/styles/fonts";
 
 export default function TabsLayout() {
-  const theme = useColorScheme();
-  const themeColors = colors[theme ?? "light"];
+  const { colors, fonts } = useAppTheme();
 
   return (
     <Tabs
@@ -15,18 +12,18 @@ export default function TabsLayout() {
         headerShown: true,
         headerTitleAlign: "center",
         headerStyle: {
-          backgroundColor: themeColors.background,
+          backgroundColor: colors.background,
         },
         headerTitleStyle: {
-          color: themeColors.text,
+          color: colors.text,
           fontFamily: fonts.heading,
           fontSize: 20,
         },
-        tabBarActiveTintColor: themeColors.secondary,
-        tabBarInactiveTintColor: themeColors.text,
+        tabBarActiveTintColor: colors.secondary,
+        tabBarInactiveTintColor: colors.text,
         tabBarStyle: {
-          backgroundColor: themeColors.background,
-          borderTopColor: themeColors.border,
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
         },
         tabBarIcon: ({ color, size }) => {
           const iconName =

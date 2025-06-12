@@ -1,12 +1,10 @@
+import { useAppTheme } from "src/styles/useAppTheme";
 import {
   ActivityIndicator,
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
 } from "react-native";
-import { colors } from "../../styles/colors";
-import { fonts } from "../../styles/fonts";
 
 interface FormButtonProps {
   onPress: () => void;
@@ -21,22 +19,28 @@ export default function FormButton({
   isLoading,
   disabled,
 }: FormButtonProps) {
-  const isDark = useColorScheme() === "dark";
-  const theme = isDark ? colors.dark : colors.light;
+  const { colors, fonts } = useAppTheme();
 
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        { backgroundColor: theme.primary, opacity: disabled ? 0.6 : 1 },
+        { backgroundColor: colors.primary, opacity: disabled ? 0.6 : 1 },
       ]}
       onPress={onPress}
       disabled={disabled || isLoading}
     >
       {isLoading ? (
-        <ActivityIndicator color={theme.text} />
+        <ActivityIndicator color={colors.text} />
       ) : (
-        <Text style={[styles.buttonText, { color: theme.text }]}>{title}</Text>
+        <Text
+          style={[
+            styles.buttonText,
+            { color: colors.text, fontFamily: fonts.textBold },
+          ]}
+        >
+          {title}
+        </Text>
       )}
     </TouchableOpacity>
   );
@@ -51,6 +55,5 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    fontFamily: fonts.textBold,
   },
 });

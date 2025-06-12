@@ -1,12 +1,15 @@
-import { useColorScheme } from "react-native";
 import { Logo } from "src/components/logo/Logo";
-import { colors } from "src/styles/colors";
+import { useAppTheme } from "src/styles/useAppTheme";
 
 export const LogoDynamic = () => {
-  const theme = useColorScheme() === "dark" ? "dark" : "light";
-  const { text, background } = colors[theme];
+  const theme = useAppTheme();
+  const { text, background } = theme.colors;
 
   return (
-    <Logo primaryColor={text} secondaryColor={background} aspectRatio={600} />
+    <Logo
+      primaryColor={text}
+      secondaryColor={background}
+      aspectRatio={260}
+    />
   );
 };

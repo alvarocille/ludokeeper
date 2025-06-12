@@ -1,21 +1,14 @@
-import { Text, useColorScheme, View } from "react-native";
-import { colors } from "src/styles/colors";
-import { screenStyles } from "src/styles/screen";
+import { useRouter } from "expo-router";
+import { View } from "react-native";
+import { useAuthStore } from "src/store/authStore";
+import { useAppTheme } from "src/styles/useAppTheme";
+import { useScreenStyles } from "src/styles/useScreenStyles";
 
-export default function MatchesScreen() {
-  const theme = useColorScheme();
-  const themeColors = colors[theme ?? "light"];
+export default function MenuScreen() {
+  const { colors } = useAppTheme();
+  const styles = useScreenStyles();
+  const router = useRouter();
+  const logout = useAuthStore((state) => state.logout);
 
-  return (
-    <View
-      style={[
-        screenStyles.container,
-        { backgroundColor: themeColors.background },
-      ]}
-    >
-      <Text style={[screenStyles.title, { color: themeColors.text }]}>
-        Registro de partidas
-      </Text>
-    </View>
-  );
+  return <View style={styles.container}></View>;
 }

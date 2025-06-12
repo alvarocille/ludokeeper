@@ -1,19 +1,24 @@
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import { Pressable, useColorScheme } from "react-native";
-import { colors } from "src/styles/colors";
+import { Pressable, StyleSheet } from "react-native";
+import { useAppTheme } from "src/styles/useAppTheme";
 
 export const HamburgerMenuButton = () => {
   const navigation = useNavigation();
-  const isDark = useColorScheme() === "dark";
-  const theme = isDark ? colors.dark : colors.light;
+  const { colors } = useAppTheme();
 
   return (
     <Pressable
       onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-      style={{ paddingHorizontal: 16 }}
+      style={styles.button}
     >
-      <Ionicons name="menu" color={theme.secondary} size={28} />
+      <Ionicons name="menu" color={colors.secondary} size={28} />
     </Pressable>
   );
 };
+
+const styles = StyleSheet.create({
+  button: {
+    paddingHorizontal: 16,
+  },
+});

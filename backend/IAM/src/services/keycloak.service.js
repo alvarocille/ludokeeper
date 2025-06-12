@@ -1,5 +1,5 @@
-const axios = require('axios');
-const qs = require('qs');
+const axios = require("axios");
+const qs = require("qs");
 
 // Variables de entorno necesarias para interactuar con Keycloak
 const baseUrl = process.env.KEYCLOAK_URL;
@@ -14,14 +14,14 @@ async function getAdminToken() {
   const tokenUrl = `${baseUrl}/realms/master/protocol/openid-connect/token`;
 
   const data = qs.stringify({
-    client_id: 'admin-cli',
-    grant_type: 'password',
+    client_id: "admin-cli",
+    grant_type: "password",
     username: adminUser,
-    password: adminPass
+    password: adminPass,
   });
 
   const res = await axios.post(tokenUrl, data, {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
   });
 
   return res.data.access_token;
@@ -30,7 +30,14 @@ async function getAdminToken() {
 /**
  * Crea un nuevo usuario en Keycloak usando las credenciales del administrador.
  */
-async function createUser({ username, email, password, firstName, lastName, attributes }) {
+async function createUser({
+  username,
+  email,
+  password,
+  firstName,
+  lastName,
+  attributes,
+}) {
   const token = await getAdminToken();
 
   const res = await axios.post(
@@ -44,17 +51,17 @@ async function createUser({ username, email, password, firstName, lastName, attr
       attributes,
       credentials: [
         {
-          type: 'password',
+          type: "password",
           value: password,
-          temporary: false
-        }
-      ]
+          temporary: false,
+        },
+      ],
     },
     {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     }
   );
 
@@ -69,16 +76,37 @@ async function login({ username, password }) {
 
   const data = qs.stringify({
     client_id: process.env.KEYCLOAK_CLIENT_ID,
-    grant_type: 'password',
+    grant_type: "password",
     username,
-    password
+    password,
   });
 
   const res = await axios.post(tokenUrl, data, {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
   });
 
   return res.data;
 }
 
-module.exports = { createUser, login };
+/**
+ * Refresca el token JWT del usuario actual.
+ */
+async function refreshToken(refreshToken) {
+  const tokenUrl = `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`;
+
+  const data = qs.stringify({
+    client_id: process.env.KEYCLOAK_CLIENT_ID,
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+  });
+
+  const res = await axios.post(tokenUrl, data, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+
+  return res.data;
+}
+
+module.exports = { createUser, login, refreshToken };

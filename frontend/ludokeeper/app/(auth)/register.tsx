@@ -1,20 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, useColorScheme, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { register } from "src/api/auth";
 import FormButton from "src/components/form/FormButton";
 import { FormContainer } from "src/components/form/FormContainer";
 import Input from "src/components/form/Input";
 import { useAuthForm } from "src/hooks/useAuthForm";
-import { authStyles } from "src/styles/authStyles";
-import { colors } from "src/styles/colors";
+import { useAuthStyles } from "src/styles/authStyles";
+import { useAppTheme } from "src/styles/useAppTheme";
 import { RegisterData, registerSchema } from "src/validations/register";
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const isDark = useColorScheme() === "dark";
-  const theme = isDark ? colors.dark : colors.light;
+  const { colors } = useAppTheme();
+  const styles = useAuthStyles();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -29,18 +29,17 @@ export default function RegisterScreen() {
   });
 
   return (
-    <View style={[authStyles.container, { backgroundColor: theme.background }]}>
+    <View style={styles.container}>
       <Pressable
-        style={authStyles.settingsButton}
+        style={styles.settingsButton}
         onPress={() => router.push("/(other)/settings")}
       >
-        <Ionicons name="settings-outline" size={24} color={theme.text} />
+        <Ionicons name="settings-outline" size={24} color={colors.text} />
       </Pressable>
 
-      <Text style={[authStyles.titleSmall, { color: theme.text }]}>
-        Registro
-      </Text>
-      {serverError && <Text style={authStyles.errorText}>{serverError}</Text>}
+      <Text style={styles.titleSmall}>Registro</Text>
+
+      {serverError && <Text style={styles.errorText}>{serverError}</Text>}
 
       <FormContainer schema={registerSchema} onSubmit={() => {}}>
         <Input
@@ -81,7 +80,7 @@ export default function RegisterScreen() {
               <Ionicons
                 name={showPassword ? "eye-off" : "eye"}
                 size={20}
-                color={theme.text}
+                color={colors.text}
               />
             </Pressable>
           }
@@ -95,10 +94,7 @@ export default function RegisterScreen() {
       </FormContainer>
 
       <Pressable onPress={() => router.replace("/(auth)/login")}>
-        {" "}
-        <Text style={[authStyles.linkText, { color: theme.secondary }]}>
-          ¿Ya tienes cuenta? Inicia sesión
-        </Text>
+        <Text style={styles.linkText}>¿Ya tienes cuenta? Inicia sesión</Text>
       </Pressable>
     </View>
   );

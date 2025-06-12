@@ -1,11 +1,16 @@
 import { Redirect } from "expo-router";
+import { useEffect } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
 import DrawerLayout from "src/components/layouts/drawerLayout";
 import TabsLayout from "src/components/layouts/tabsLayout";
 import { useAuthStore } from "src/store/authStore";
 
-export default function AppLayout() {
+export default function RootLayout() {
   const { isAuthenticated, isLoading } = useAuthStore();
+
+  useEffect(() => {
+    useAuthStore.getState().loadToken();
+  }, []);
 
   if (isLoading) {
     return (

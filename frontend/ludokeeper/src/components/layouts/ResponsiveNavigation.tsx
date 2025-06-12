@@ -1,4 +1,3 @@
-// src/components/layouts/ResponsiveNavigation.tsx
 import { useWindowDimensions } from "react-native";
 import DrawerLayout from "./drawerLayout";
 import TabsLayout from "./tabsLayout";
