@@ -1,20 +1,28 @@
 import { INVENTORY_API_URL } from "@env";
 import axios from "axios";
-import { Game } from "src/components/inventory/GameCard";
+import { Game } from "src/components/games/GameCard";
 
-export interface CreateGameDTO {
-  source: "custom";
-  customData?: {
-    name?: string;
-    description?: string;
-    minPlayers?: number;
-    maxPlayers?: number;
-    playTime?: number;
-    imageUrl?: string;
-  };
-  acquisitionDate?: string;
-  notes?: string;
-}
+export type CreateGameDTO =
+  | {
+      source: "custom";
+      customData: {
+        name: string;
+        description?: string;
+        minPlayers?: number;
+        maxPlayers?: number;
+        playTime?: number;
+        imageUrl?: string;
+      };
+      acquisitionDate?: string;
+      notes?: string;
+    }
+  | {
+      source: "catalog";
+      gameId: string;
+      acquisitionDate?: string;
+      notes?: string;
+    };
+
 
 export interface UpdateGameDTO {
   customData?: {
@@ -34,15 +42,16 @@ export async function getUserGames(
   filters: Record<string, string>,
 ): Promise<Game[]> {
   const query = new URLSearchParams(filters).toString();
+  const url = query
+    ? `${INVENTORY_API_URL}/inventory?${query}`
+    : `${INVENTORY_API_URL}/inventory`;
 
-  const res = await axios.get<{ data: Game[] }>(
-    `${INVENTORY_API_URL}/inventory?${query}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    console.log("Llamando a getUserGames con URL:", url);
+  const res = await axios.get<{ data: Game[] }>(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
     },
-  );
+  });
 
   return res.data.data || [];
 }
@@ -85,3 +94,5 @@ export async function addGame(
   );
   return res.data.data;
 }
+
+

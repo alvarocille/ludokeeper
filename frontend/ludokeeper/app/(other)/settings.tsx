@@ -92,24 +92,6 @@ export default function SettingsScreen() {
             </Pressable>
           );
         })}
-
-        <Text
-          style={{
-            ...styles.title,
-            marginTop: 32,
-          }}
-        >
-          Idioma
-        </Text>
-
-        <Text
-          style={{
-            ...styles.itemText,
-            marginBottom: 12,
-          }}
-        >
-          (Próximamente) Selección de idioma para la aplicación.
-        </Text>
       </ScrollView>
     </>
   );

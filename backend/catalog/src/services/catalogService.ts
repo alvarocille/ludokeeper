@@ -1,4 +1,6 @@
+import { catalogGameQuerySchema } from 'src/schemas/catalogSchemas'
 import { CatalogGame } from '../models/catalogGame'
+import { z } from 'zod'
 
 /**
  * Crea un nuevo juego de catálogo.
@@ -16,28 +18,20 @@ export async function createCatalogGame(data: any) {
  * Lista todos los juegos con filtro opcional.
  */
 export async function listCatalogGames(filters: Record<string, string>) {
-  const {
-    name,
-    category,
-    mechanic,
-    publisher,
-    minPlayers,
-    maxPlayers,
-    yearPublished
-  } = filters
+  const { name, category, mechanic, publisher, minPlayers, maxPlayers, yearPublished } = filters;
 
-  const query: Record<string, any> = {}
+  const query: Record<string, any> = {};
+  if (name) query.name = new RegExp(name, 'i');
+  if (category) query.categories = category;
+  if (mechanic) query.mechanics = mechanic;
+  if (publisher) query.publisher = publisher;
+  if (yearPublished) query.yearPublished = parseInt(yearPublished);
+  if (minPlayers) query.minPlayers = { $lte: parseInt(minPlayers) };
+  if (maxPlayers) query.maxPlayers = { $gte: parseInt(maxPlayers) };
 
-  if (name) query.name = new RegExp(name, 'i')
-  if (category) query.categories = category
-  if (mechanic) query.mechanics = mechanic
-  if (publisher) query.publisher = publisher
-  if (yearPublished) query.yearPublished = parseInt(yearPublished)
-  if (minPlayers) query.minPlayers = { $lte: parseInt(minPlayers) }
-  if (maxPlayers) query.maxPlayers = { $gte: parseInt(maxPlayers) }
-
-  return await CatalogGame.find(query)
+  return await CatalogGame.find(query);
 }
+
 
 
 /**

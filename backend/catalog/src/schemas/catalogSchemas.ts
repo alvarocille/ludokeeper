@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 
-// 🎮 Esquema base común para los juegos del catálogo
+// Esquema base común para los juegos del catálogo
 const baseFields = {
   name: z.string().min(1, 'El nombre es obligatorio'),
   description: z.string().optional(),
@@ -16,32 +16,51 @@ const baseFields = {
   source: z.enum(['manual', 'external']).optional()
 }
 
-// ✅ Para crear juegos (POST): obligatorio `name`
+// Para crear juegos (POST): obligatorio `name`
 export const addCatalogGameSchema = z.object({
   ...baseFields,
   name: z.string().min(1, 'El nombre es obligatorio') // refuerzo explícito
 })
 
-// 🔁 Para actualizar juegos (PUT): todos opcionales
+// Para actualizar juegos (PUT): todos opcionales
 export const updateCatalogGameSchema = z.object(baseFields).partial()
 
-// 🔎 Búsqueda por query (GET con filtros)
+// Búsqueda por query (GET con filtros)
 export const catalogGameQuerySchema = z.object({
   name: z.string().optional(),
   category: z.string().optional(),
   mechanic: z.string().optional(),
   publisher: z.string().optional(),
-  minPlayers: z.string().regex(/^\d+$/, 'Debe ser un número entero positivo').optional(),
-  maxPlayers: z.string().regex(/^\d+$/, 'Debe ser un número entero positivo').optional(),
-  yearPublished: z.string().regex(/^\d{4}$/, 'Debe ser un año válido').optional()
-})
+  minPlayers: z
+    .string()
+    .optional()
+    .refine(val => !val || /^\d+$/.test(val), {
+      message: 'Debe ser un número entero positivo',
+    }),
+  maxPlayers: z
+    .string()
+    .optional()
+    .refine(val => !val || /^\d+$/.test(val), {
+      message: 'Debe ser un número entero positivo',
+    }),
+  yearPublished: z
+    .string()
+    .optional()
+    .refine(val => !val || /^\d{4}$/.test(val), {
+      message: 'Debe ser un año válido',
+    }),
+});
+
+
+
+
 
 // 🔑 ID de ruta
 export const idParamSchema = z.object({
   id: z.string().regex(/^[a-f\d]{24}$/i, 'ID inválido')
 })
 
-// 📘 Respuesta completa para un juego
+// Respuesta completa para un juego
 export const catalogGameResponseSchema = {
   type: 'object',
   properties: {
@@ -62,7 +81,7 @@ export const catalogGameResponseSchema = {
   }
 }
 
-// 📦 Conversión a JSON Schema para Swagger
+// Conversión a JSON Schema para Swagger
 export const addCatalogGameSchemaRef = zodToJsonSchema(addCatalogGameSchema, { name: 'AddCatalogGame' })
 export const updateCatalogGameSchemaRef = zodToJsonSchema(updateCatalogGameSchema, { name: 'UpdateCatalogGame' })
 export const idParamSchemaRef = zodToJsonSchema(idParamSchema, { name: 'IdParam' })

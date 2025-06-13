@@ -3,6 +3,7 @@ import DropdownSelect from "src/components/form/DropdownSelect";
 import { useAppTheme } from "src/styles/useAppTheme";
 
 interface Props {
+  variant: "inventory" | "catalog";
   filters: {
     name?: string;
     category?: string;
@@ -15,14 +16,18 @@ interface Props {
   onChange: (key: keyof Props["filters"], value: string) => void;
 }
 
-export default function SearchAndFilterBar({ filters, onChange }: Props) {
+export default function SearchAndFilterBar({
+  variant,
+  filters,
+  onChange,
+}: Props) {
   const { colors, fonts } = useAppTheme();
 
   return (
     <View style={styles.container}>
       <TextInput
         placeholder="Buscar por nombre"
-        value={filters.name}
+        value={filters.name ?? ""}
         onChangeText={(text) => onChange("name", text)}
         style={[
           styles.input,
@@ -60,7 +65,7 @@ export default function SearchAndFilterBar({ filters, onChange }: Props) {
             key={key}
             placeholder={placeholder}
             keyboardType={numeric ? "numeric" : "default"}
-            value={filters[key as keyof Props["filters"]]}
+            value={filters[key as keyof Props["filters"]] ?? ""}
             onChangeText={(text) =>
               onChange(key as keyof Props["filters"], text)
             }
@@ -76,15 +81,17 @@ export default function SearchAndFilterBar({ filters, onChange }: Props) {
           />
         ))}
 
-        <DropdownSelect
-          value={filters.source || ""}
-          onChange={(val) => onChange("source", val)}
-          options={[
-            { label: "Fuente", value: "" },
-            { label: "Catálogo", value: "catalog" },
-            { label: "Personalizado", value: "custom" },
-          ]}
-        />
+        {variant === "inventory" && (
+          <DropdownSelect
+            value={filters.source ?? ""}
+            onChange={(val) => onChange("source", val)}
+            options={[
+              { label: "Fuente", value: "" },
+              { label: "Catálogo", value: "catalog" },
+              { label: "Personalizado", value: "custom" },
+            ]}
+          />
+        )}
       </ScrollView>
     </View>
   );
@@ -114,14 +121,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginRight: 8,
     minWidth: 110,
-  },
-  pickerWrapper: {
-    height: 38,
-    borderWidth: 1,
-    borderRadius: 12,
-    marginRight: 8,
-    justifyContent: "center",
-    overflow: "hidden",
-    minWidth: 140,
   },
 });

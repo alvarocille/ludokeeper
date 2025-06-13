@@ -1,19 +1,20 @@
-import Fastify from 'fastify'
+import cors from '@fastify/cors'
 import fastifyJWT from '@fastify/jwt'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
 import dotenv from 'dotenv'
+import Fastify from 'fastify'
 import fs from 'fs'
 import path from 'path'
 
+import { authenticate, requireAdmin } from './middlewares/auth'
 import { catalogRoutes } from './routes/catalogRoutes'
-import { requireAdmin, authenticate } from './middlewares/auth'
-import { connectDB } from './utils/db'
 import {
   addCatalogGameSchemaRef,
-  updateCatalogGameSchemaRef,
-  idParamSchemaRef
-} from './schemas/catalogSchemas' // Asegúrate de tener estos exports
+  idParamSchemaRef,
+  updateCatalogGameSchemaRef
+} from './schemas/catalogSchemas'; // Asegúrate de tener estos exports
+import { connectDB } from './utils/db'
 
 dotenv.config()
 
@@ -23,14 +24,32 @@ async function main() {
   })
 
   try {
-    // ✅ Validación robusta de clave pública
+
+    app.addHook('onRequest', async (req) => {
+      console.log("📡 Request completa →", {
+        method: req.method,
+        url: req.url,
+        query: req.query,
+        headers: req.headers
+      });
+    });
+
+
+    await app.register(cors, {
+      origin: ['http://localhost:8081'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+    });
+
+    // Validación robusta de clave pública
     const publicKeyPath = path.resolve(process.env.JWT_PUBLIC_KEY_PATH || './public_key.pem')
     if (!fs.existsSync(publicKeyPath)) {
       throw new Error(`🔒 No se encontró el archivo de clave pública: ${publicKeyPath}`)
     }
     const publicKey = fs.readFileSync(publicKeyPath, 'utf8')
 
-    // 🔐 Registro de JWT con clave pública
+    // Registro de JWT con clave pública
     await app.register(fastifyJWT as any, {
       secret: {
         public: publicKey,
@@ -41,7 +60,7 @@ async function main() {
 
 
 
-    // 📄 Swagger OpenAPI
+    // Swagger OpenAPI
     await app.register(fastifySwagger as any, {
       openapi: {
         info: {
@@ -77,13 +96,18 @@ async function main() {
       }
     })
 
-    // 📦 MongoDB
+    // MongoDB
     await connectDB()
 
-    // 🛣️ Rutas del catálogo
-    await catalogRoutes(app, { authenticate, requireAdmin })
+    // Rutas del catálogo
+    await app.register(catalogRoutes, {
+      prefix: '/catalog',
+      authenticate,
+      requireAdmin,
+    });
 
-    // 🧯 Manejador global de errores
+
+    // Manejador global de errores
     app.setErrorHandler((error, request, reply) => {
       app.log.error(error)
       reply.code(error.statusCode || 500).send({
@@ -92,7 +116,7 @@ async function main() {
       })
     })
 
-    // 🚀 Lanzar servidor
+    // Lanzar servidor
     const PORT = parseInt(process.env.PORT || '3002', 10)
     await app.listen({ port: PORT, host: '0.0.0.0' })
     console.log(`🚀 Catálogo iniciado en http://localhost:${PORT}/docs`)
@@ -103,3 +127,4 @@ async function main() {
 }
 
 main()
+

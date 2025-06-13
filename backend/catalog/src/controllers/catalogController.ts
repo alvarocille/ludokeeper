@@ -1,9 +1,13 @@
-import { FastifyRequest, FastifyReply } from 'fastify'
-import * as catalogService from '../services/catalogService'
+import { FastifyReply, FastifyRequest } from 'fastify'
+import { z } from 'zod'
 import {
   addCatalogGameSchema,
+  catalogGameQuerySchema,
   updateCatalogGameSchema
 } from '../schemas/catalogSchemas'
+import * as catalogService from '../services/catalogService'
+
+type CatalogFilters = z.infer<typeof catalogGameQuerySchema>
 
 export async function addCatalogGame(request: FastifyRequest, reply: FastifyReply) {
   const result = addCatalogGameSchema.safeParse(request.body)
@@ -22,11 +26,35 @@ export async function addCatalogGame(request: FastifyRequest, reply: FastifyRepl
   }
 }
 
-export async function listCatalogGames(request: FastifyRequest, reply: FastifyReply) {
-  const filters = request.query as Record<string, string>
-  const games = await catalogService.listCatalogGames(filters)
-  return reply.send({ data: games })
+export async function listCatalogGames(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  // Normaliza el prototipo nulo
+  const rawQuery = { ...(typeof request.query === 'object' && request.query !== null ? request.query : {}) } as Record<string, string>;
+
+  // Limpia valores vacíos
+  const cleanedQuery: Record<string, string | undefined> = {};
+  for (const [key, value] of Object.entries(rawQuery)) {
+    cleanedQuery[key] = value?.trim?.() === '' ? undefined : value;
+  }
+
+  // Validación con Zod
+  const result = catalogGameQuerySchema.safeParse(cleanedQuery);
+
+  console.log('✅ Query recibida:', cleanedQuery);
+  console.log('🔍 Prototipo:', Object.getPrototypeOf(request.query));
+
+  if (!result.success) {
+    console.error('❌ Validación fallida:', result.error.flatten());
+    return reply.status(400).send({ error: 'Parámetros inválidos', details: result.error.format() });
+  }
+
+  // Ya está validado
+  const games = await catalogService.listCatalogGames(result.data);
+  return reply.send({ data: games });
 }
+
 
 export async function getCatalogGameById(request: FastifyRequest, reply: FastifyReply) {
   const { id } = request.params as { id: string }

@@ -1,26 +1,29 @@
-import { addGameSchema, updateGameSchema } from '../schemas/inventorySchemas'
-import * as inventoryService from '../services/inventoryService'
-import { AuthenticatedUser } from '../test/types/global'
-import { inventoryQuerySchema } from '../schemas/inventorySchemas'
+import { addGameSchema, inventoryQuerySchema, updateGameSchema } from '../schemas/inventorySchemas';
+import * as inventoryService from '../services/inventoryService';
+import { AuthenticatedUser } from '../test/types/global';
 
 /**
  * POST /inventory
  * Agrega un nuevo juego al inventario del usuario autenticado.
  */
 export async function addGame(request, reply) {
-  const parsed = addGameSchema.safeParse(request.body)
+  const parsed = addGameSchema.safeParse(request.body);
   if (!parsed.success) {
-    return reply.code(400).send({ error: 'Datos inválidos', details: parsed.error.format() })
+    return reply.code(400).send({ error: 'Datos inválidos', details: parsed.error.format() });
   }
 
-  const user = request.user as AuthenticatedUser
-  const game = await inventoryService.addGame(user.sub, parsed.data)
+  const user = request.user as AuthenticatedUser;
+  const authHeader = request.headers.authorization;
+
+  const game = await inventoryService.addGame(user.sub, parsed.data, authHeader);
 
   return reply.code(201).send({
     message: 'Juego añadido al inventario',
     data: game.toObject({ versionKey: false })
-  })
+  });
 }
+
+
 
 /**
  * GET /inventory
@@ -30,7 +33,7 @@ export async function getUserInventory(request, reply) {
   const user = request.user as AuthenticatedUser
 
   // Validación segura del query usando el schema de Zod
-  const parsed = inventoryQuerySchema.safeParse(request.query)
+  const parsed = inventoryQuerySchema.safeParse(request.query || {})
 
   if (!parsed.success) {
     return reply.code(400).send({
@@ -40,10 +43,12 @@ export async function getUserInventory(request, reply) {
   }
 
   const filters = parsed.data
-  const inventory = await inventoryService.getUserInventory(user.sub, filters)
+   const token = request.headers.authorization
+
+  const inventory = await inventoryService.getUserInventory(user.sub, filters, token)
 
   return reply.send({
-    data: inventory.map(g => g.toObject({ versionKey: false }))
+    data: inventory
   })
 }
 
@@ -61,7 +66,7 @@ export async function getGameById(request, reply) {
     return reply.code(404).send({ error: 'Juego no encontrado' })
   }
 
-  return reply.send({ data: game.toObject({ versionKey: false }) })
+  return reply.send({ data: game })
 }
 
 /**

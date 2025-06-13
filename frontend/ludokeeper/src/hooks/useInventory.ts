@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { getUserGames } from "src/api/inventory";
-import { Game } from "src/components/inventory/GameCard";
+import { Game } from "src/components/games/GameCard";
 import { useAuthStore } from "src/store/authStore";
 
 interface Filters {

@@ -22,7 +22,7 @@ export default function RootLayout() {
 
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
+  } else {
+    return Platform.OS === "web" ? <DrawerLayout /> : <TabsLayout />;
   }
-
-  return Platform.OS === "web" ? <DrawerLayout /> : <TabsLayout />;
 }

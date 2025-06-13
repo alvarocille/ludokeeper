@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { useAppTheme } from "src/styles/useAppTheme";
-import { Game } from "../inventory/GameCard";
+import { Game } from "../games/GameCard";
 
 interface Props {
   visible: boolean;
@@ -30,12 +30,18 @@ export default function GameDetailsModal({
 
   if (!game) return null;
 
-  const { name, description, imageUrl, minPlayers, maxPlayers, playTime } =
-    game.customData;
+  const {
+    name = "Juego sin datos",
+    description,
+    imageUrl,
+    minPlayers,
+    maxPlayers,
+    playTime,
+  } = game.customData || {};
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={[styles.overlay]}>
+      <View style={styles.overlay}>
         <View style={[styles.modal, { backgroundColor: colors.background }]}>
           <ScrollView>
             {imageUrl && (

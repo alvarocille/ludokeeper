@@ -16,7 +16,7 @@ import Input from "src/components/form/Input";
 import { useAuthStore } from "src/store/authStore";
 import { useAppTheme } from "src/styles/useAppTheme";
 import { z } from "zod";
-import { Game } from "../inventory/GameCard";
+import { Game } from "../games/GameCard";
 
 const positiveIntOptional = z
   .union([z.string().regex(/^\d+$/), z.number().int().min(1)])
@@ -24,13 +24,11 @@ const positiveIntOptional = z
   .optional();
 
 const schema = z.object({
-  name: z.string().optional(),
+  name: z.string().min(1, "El nombre es obligatorio"),
   description: z.string().optional(),
-
   minPlayers: positiveIntOptional,
   maxPlayers: positiveIntOptional,
   playTime: positiveIntOptional,
-
   imageUrl: z
     .string()
     .trim()
@@ -39,9 +37,7 @@ const schema = z.object({
     .refine((val) => !val || /^https?:\/\/.+\..+/.test(val), {
       message: "Debe ser una URL válida",
     }),
-
   notes: z.string().optional(),
-
   acquisitionDate: z
     .string()
     .trim()
@@ -103,9 +99,17 @@ export default function GameFormModal({
 
   const onSubmit = async (values: FormData) => {
     try {
-      const customData = Object.fromEntries(
-        Object.entries(values).filter(([_, v]) => v !== undefined && v !== "")
-      );
+      const { name, description, minPlayers, maxPlayers, playTime, imageUrl } =
+        values;
+
+      const customData = {
+        name,
+        ...(description && { description }),
+        ...(minPlayers && { minPlayers }),
+        ...(maxPlayers && { maxPlayers }),
+        ...(playTime && { playTime }),
+        ...(imageUrl && { imageUrl }),
+      };
 
       if (initialData) {
         await updateGame(token!, initialData._id, { customData });

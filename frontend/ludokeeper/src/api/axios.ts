@@ -3,7 +3,8 @@ import { useAuthStore } from "src/store/authStore";
 
 const api = axios.create();
 
-api.interceptors.request.use((config) => {
+// Interceptor de petición: añade token
+api.interceptors.request.use(async (config) => {
   const token = useAuthStore.getState().token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -11,6 +12,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Interceptor de respuesta: maneja 401 y refresca token
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
@@ -31,7 +33,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;

@@ -1,0 +1,32 @@
+services:
+
+  match-service:
+    build: .
+    container_name: match-service
+    ports:
+      - "3003:3003"
+    environment:
+      PORT: 3003
+      MONGODB_URI: mongodb://mongo_match:27017/match
+      JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key.pem
+    secrets:
+      - jwt_public_key.pem
+    depends_on:
+      - mongo_match
+    restart: unless-stopped
+
+  mongo_match:
+    image: mongo:6
+    container_name: mongo_match
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo_match_data:/data/db
+    restart: unless-stopped
+
+secrets:
+  jwt_public_key.pem:
+    file: ./public_key.pem
+
+volumes:
+  mongo_match_data:

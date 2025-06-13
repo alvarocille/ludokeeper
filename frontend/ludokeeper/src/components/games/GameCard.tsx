@@ -6,11 +6,7 @@ export interface Game {
   _id: string;
   userId: string;
   source: "custom" | "catalog";
-  acquisitionDate?: string;
-  notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  customData: {
+  customData?: {
     name: string;
     description?: string;
     minPlayers?: number;
@@ -18,20 +14,47 @@ export interface Game {
     playTime?: number;
     imageUrl?: string;
   };
+  gameId?: {
+    name: string;
+    description?: string;
+    minPlayers?: number;
+    maxPlayers?: number;
+    playTime?: number;
+    imageUrl?: string;
+    yearPublished?: number;
+    publisher?: string;
+    categories?: string[];
+    mechanics?: string[];
+  };
+  acquisitionDate?: string;
+  notes?: string;
 }
 
 interface Props {
   game: Game;
+  variant: "inventory" | "catalog";
   onPress?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onAdd?: () => void;
 }
 
-export default function GameCard({ game, onPress, onEdit, onDelete }: Props) {
+export default function GameCard({
+  game,
+  variant,
+  onPress,
+  onEdit,
+  onDelete,
+  onAdd,
+}: Props) {
   const { colors, fonts } = useAppTheme();
 
   const { name, minPlayers, maxPlayers, playTime, imageUrl } =
-    game.customData || {};
+    game.customData || {
+      name: "Juego sin datos",
+    };
+
+  console.log(game);
 
   return (
     <Pressable
@@ -73,14 +96,19 @@ export default function GameCard({ game, onPress, onEdit, onDelete }: Props) {
       </View>
 
       <View style={styles.actions}>
-        {onEdit && (
+        {variant === "inventory" && onEdit && (
           <Pressable onPress={onEdit}>
             <Ionicons name="create-outline" size={20} color={colors.text} />
           </Pressable>
         )}
-        {onDelete && (
+        {variant === "inventory" && onDelete && (
           <Pressable onPress={onDelete}>
             <Ionicons name="trash-outline" size={20} color={colors.text} />
+          </Pressable>
+        )}
+        {variant === "catalog" && onAdd && (
+          <Pressable onPress={onAdd}>
+            <Ionicons name="add-circle-outline" size={22} color={colors.text} />
           </Pressable>
         )}
       </View>

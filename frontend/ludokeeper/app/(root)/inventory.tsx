@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
 import {
   Alert,
   Platform,
@@ -9,8 +10,8 @@ import {
   View,
 } from "react-native";
 import { deleteGame } from "src/api/inventory";
-import GameCard, { Game } from "src/components/inventory/GameCard";
-import SearchAndFilterBar from "src/components/inventory/SearchAndFilterBar";
+import GameCard, { Game } from "src/components/games/GameCard";
+import SearchAndFilterBar from "src/components/games/SearchAndFilterBar";
 import GameDetailsModal from "src/components/layouts/GameDetailsModal";
 import GameFormModal from "src/components/layouts/GameFormModal";
 import { useInventory } from "src/hooks/useInventory";
@@ -56,6 +57,12 @@ export default function InventoryScreen() {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [])
+  );
+
   return (
     <View style={styles.container}>
       <SearchAndFilterBar
@@ -63,6 +70,7 @@ export default function InventoryScreen() {
         onChange={(key, value) =>
           setFilters((prev) => ({ ...prev, [key]: value }))
         }
+        variant={"inventory"}
       />
 
       {loading && <Text style={styles.loadingText}>Cargando juegos...</Text>}
@@ -83,6 +91,7 @@ export default function InventoryScreen() {
               setFormVisible(true);
             }}
             onDelete={() => handleDelete(game)}
+            variant={"inventory"}
           />
         ))}
       </ScrollView>

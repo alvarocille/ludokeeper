@@ -44,15 +44,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       console.log("[Auth] Tokens cargados desde AsyncStorage");
 
-      // Lanza refresco automático tras cargar sesión
+      // Lanza refresco automático
       if (refreshInterval) clearInterval(refreshInterval);
-      refreshInterval = setInterval(
-        () => {
-          console.log("[Auth] ⏰ Refrescando token por intervalo...");
-          get().refreshSession();
-        },
-        4 * 60 * 1000,
-      ); // cada 4 minutos
+      refreshInterval = setInterval(() => {
+        console.log("[Auth] ⏰ Refrescando token por intervalo...");
+        get().refreshSession();
+      }, 4 * 60 * 1000);
     } catch (err) {
       console.error("[Auth] Error en loadToken:", err);
       set({ isLoading: false });
@@ -71,15 +68,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
       });
 
-      // Activa el temporizador de refresh
+      // Forzamos refresh inmediato por seguridad
+      await get().refreshSession();
+
       if (refreshInterval) clearInterval(refreshInterval);
-      refreshInterval = setInterval(
-        () => {
-          console.log("[Auth] ⏰ Refrescando token por intervalo...");
-          get().refreshSession();
-        },
-        4 * 60 * 1000,
-      ); // cada 4 minutos
+      refreshInterval = setInterval(() => {
+        console.log("[Auth] ⏰ Refrescando token por intervalo...");
+        get().refreshSession();
+      }, 4 * 60 * 1000);
     } catch (err) {
       console.error("[Auth] Error al guardar tokens:", err);
     }
@@ -87,8 +83,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refreshSession: async () => {
     try {
-      const refreshToken =
-        get().refreshToken || (await AsyncStorage.getItem("refreshToken"));
+      const refreshToken = get().refreshToken || (await AsyncStorage.getItem("refreshToken"));
       if (!refreshToken || refreshToken.length < 20)
         throw new Error("No refresh token válido disponible");
 
@@ -128,16 +123,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       } else {
         confirmed = await new Promise<boolean>((resolve) => {
           Alert.alert("Cerrar sesión", "¿Seguro que quieres salir?", [
-            {
-              text: "Cancelar",
-              style: "cancel",
-              onPress: () => resolve(false),
-            },
-            {
-              text: "Cerrar sesión",
-              style: "destructive",
-              onPress: () => resolve(true),
-            },
+            { text: "Cancelar", style: "cancel", onPress: () => resolve(false) },
+            { text: "Cerrar sesión", style: "destructive", onPress: () => resolve(true) },
           ]);
         });
       }
