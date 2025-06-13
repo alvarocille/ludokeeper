@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   keycloak-db:
     image: ${POSTGRES_IMAGE}
@@ -8,8 +10,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - backend
 
   keycloak:
     image: ${KEYCLOAK_IMAGE}
@@ -25,122 +25,10 @@ services:
       KC_DB_URL_DATABASE: ${POSTGRES_DB}
       KC_DB_USERNAME: ${POSTGRES_USER}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - ./import:/opt/keycloak/data/import
     depends_on:
       - keycloak-db
-    networks:
-      - backend
-
-  iam:
-    build:
-      context: .
-    image: ${IAM_IMAGE}
-    container_name: ${IAM_CONTAINER}
-    ports:
-      - "${IAM_PORT}:3000"
-    env_file:
-      - .env
-    networks:
-      - backend
-
-  inventory-service:
-    build: .
-    container_name: inventory-service
-    ports:
-      - "3001:3001"
-    environment:
-      PORT: 3001
-      MONGODB_URI: mongodb://mongo_inventory:27017/inventory
-      CATALOG_API_URL: http://catalog-service:3002
-      JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key.pem
-    secrets:
-      - jwt_public_key.pem
-    depends_on:
-      - mongo_inventory
-    restart: unless-stopped
-    networks:
-      - backend
-      - inventory-catalog
-
-  mongo_inventory:
-    image: mongo:6
-    container_name: mongo_inventory
-    ports:
-      - "27019:27017"
     volumes:
-      - mongo_inventory_data:/data/db
-    restart: unless-stopped
-    networks:
-      - backend
-
-  catalog-service:
-    build: .
-    container_name: catalog-service
-    ports:
-      - "3002:3002"
-    environment:
-      PORT: 3002
-      MONGODB_URI: mongodb://mongo_catalog:27017/catalog
-      JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key.pem
-    secrets:
-      - jwt_public_key.pem
-    depends_on:
-      - mongo_catalog
-    restart: unless-stopped
-    networks:
-      - backend
-      - inventory-catalog
-
-  mongo_catalog:
-    image: mongo:6
-    container_name: mongo_catalog
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongo_catalog_data:/data/db
-    restart: unless-stopped
-    networks:
-      - backend
-
-  match-service:
-    build: .
-    container_name: match-service
-    ports:
-      - "3003:3003"
-    environment:
-      PORT: 3003
-      MONGODB_URI: mongodb://mongo_match:27017/match
-      JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key.pem
-    secrets:
-      - jwt_public_key.pem
-    depends_on:
-      - mongo_match
-    restart: unless-stopped
-    networks:
-      - backend
-
-  mongo_match:
-    image: mongo:6
-    container_name: mongo_match
-    ports:
-      - "27020:27017"
-    volumes:
-      - mongo_match_data:/data/db
-    restart: unless-stopped
-    networks:
-      - backend
-
-secrets:
-  jwt_public_key.pem:
-    file: ./public_key.pem
+      - ./import:/opt/keycloak/data/import
 
 volumes:
   postgres_data:
-  mongo_inventory_data:
-  mongo_catalog_data:
-  mongo_match_data:
-
-networks:
-  backend:
-  inventory-catalog:
