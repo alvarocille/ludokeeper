@@ -33,3 +33,8 @@ Este repositorio actúa como **punto central de orquestación** de todos los mic
 ├── run.ps1               # Script para iniciar el proyecto (Windows)
 ├── run.sh                # Script para iniciar el proyecto (Linux/macOS)
 └── README.md             # Este archivo
+
+## Memoria del Proyecto
+Para obtener una descripción completa del análisis, diseño, implementación, pruebas y despliegue del proyecto, puedes consultar la memoria del proyecto en formato PDF, la cual se encuentra en este repositorio:
+
+[Memoria del Proyecto (PDF)](https://github.com/alvarocille/ludokeeper/blob/main/Cilleruelo_Sinovas_Alvaro_Memoria_ProyectoFinal_DAM25.pdf)
